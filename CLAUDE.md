@@ -14,6 +14,10 @@ npm run build                            # tsc --noEmit type-check, then vite bu
 
 There is no linter. `npm run build` is the type/unused-code check (`strict`, `noUnusedLocals`, `noUnusedParameters`).
 
+## Git workflow
+
+After every change, commit it and push to GitHub (`origin`, branch `main`). Write a descriptive commit message: a short summary line saying what changed, then a body explaining why when that isn't obvious. Keep unrelated changes in separate commits.
+
 ## What this is
 
 "Cedi Tracker" is a client-only React 18 + TypeScript + Vite expense tracker. It has no backend. All data lives in the browser's IndexedDB through Dexie. Currency is Ghanaian Cedi (GHS).
