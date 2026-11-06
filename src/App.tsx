@@ -48,7 +48,11 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>(initialTheme);
 
   useEffect(() => {
-    const onHash = () => setPage(pageFromHash());
+    // Every page change (nav, in-page links, back/forward) starts at the top.
+    const onHash = () => {
+      setPage(pageFromHash());
+      window.scrollTo({ top: 0 });
+    };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
@@ -61,11 +65,6 @@ export default function App() {
       /* ignore */
     }
   }, [theme]);
-
-  const navigate = useCallback((p: PageId) => {
-    window.location.hash = p;
-    window.scrollTo({ top: 0 });
-  }, []);
 
   const openAdd = () => {
     setEditing(null);
@@ -136,7 +135,7 @@ export default function App() {
         {/* Keyed by page so moving to another page clears a previous error. */}
         <PageErrorBoundary key={page}>
           <Suspense fallback={<PageSkeleton />}>
-            {page === 'dashboard' && <Dashboard month={month} setMonth={setMonth} onEdit={openEdit} onAdd={openAdd} navigate={navigate} />}
+            {page === 'dashboard' && <Dashboard month={month} setMonth={setMonth} onEdit={openEdit} onAdd={openAdd} />}
             {page === 'transactions' && <Transactions onEdit={openEdit} />}
             {page === 'budgets' && <Budgets month={month} setMonth={setMonth} />}
             {page === 'reports' && <Reports />}

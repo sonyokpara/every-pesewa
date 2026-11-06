@@ -10,14 +10,12 @@ import { formatMoney, monthLabel, shiftMonth } from '../lib/format';
 import { useBudgets, useBudgetsQuery, useCategories, useCategoryMap, useTransactions } from '../lib/hooks';
 import { budgetProgress, budgetSummary, byCategory, inMonth, totals } from '../lib/stats';
 import type { Budget, Transaction } from '../types';
-import type { PageId } from '../App';
 
 interface Props {
   month: string;
   setMonth: (m: string) => void;
   onEdit: (t: Transaction) => void;
   onAdd: () => void;
-  navigate: (p: PageId) => void;
 }
 
 /** How many budgets the dashboard lists before "Show all" (most-used first, so the urgent ones stay visible). */
@@ -38,7 +36,6 @@ function DashboardContent({
   setMonth,
   onEdit,
   onAdd,
-  navigate,
   all,
   budgets,
 }: Props & { all: Transaction[]; budgets: Budget[] }) {
@@ -73,9 +70,9 @@ function DashboardContent({
           <h2 id="budgets-heading" className="font-semibold">
             Monthly budgets <span className="font-normal text-slate-500 dark:text-slate-400">· {monthLabel(month)}</span>
           </h2>
-          <button className="text-sm text-emerald-700 hover:underline dark:text-emerald-400" onClick={() => navigate('budgets')}>
-            {progress.length ? 'Edit budgets →' : 'Set budgets →'}
-          </button>
+          <a href="#budgets" className="inline-block py-1 text-sm text-emerald-700 hover:underline dark:text-emerald-400">
+            {progress.length ? 'Edit budgets' : 'Set budgets'} <span aria-hidden>→</span>
+          </a>
         </div>
         {!progress.length ? (
           <>
@@ -141,9 +138,9 @@ function DashboardContent({
         <section className={`card min-w-0 ${spending.length ? 'lg:col-span-3' : 'lg:col-span-5'}`}>
           <div className="mb-2 flex items-center justify-between">
             <h2 className="font-semibold">Recent transactions</h2>
-            <button className="text-sm text-emerald-700 hover:underline dark:text-emerald-400" onClick={() => navigate('transactions')}>
-              View all →
-            </button>
+            <a href="#transactions" className="inline-block py-1 text-sm text-emerald-700 hover:underline dark:text-emerald-400">
+              View all <span aria-hidden>→</span>
+            </a>
           </div>
           <TransactionList
             transactions={recent}
@@ -175,9 +172,9 @@ function DashboardContent({
             {spending.length > LEGEND_SHOWN && (
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                 +{spending.length - LEGEND_SHOWN} more {spending.length - LEGEND_SHOWN === 1 ? 'category' : 'categories'} ·{' '}
-                <button className="py-1 text-emerald-700 hover:underline dark:text-emerald-400" onClick={() => navigate('reports')}>
-                  See report →
-                </button>
+                <a href="#reports" className="inline-block py-1 text-emerald-700 hover:underline dark:text-emerald-400">
+                  See report <span aria-hidden>→</span>
+                </a>
               </p>
             )}
           </section>
