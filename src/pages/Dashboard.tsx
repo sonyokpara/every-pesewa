@@ -2,12 +2,13 @@ import { useMemo } from 'react';
 import { BudgetBar, BudgetTotalBar } from '../components/BudgetBar';
 import { CategoryDonut } from '../components/Charts';
 import { MonthPicker } from '../components/MonthPicker';
+import { DashboardSkeleton } from '../components/Skeleton';
 import { SummaryCards } from '../components/SummaryCards';
 import { TransactionList } from '../components/TransactionList';
 import { formatMoney, monthLabel } from '../lib/format';
-import { useBudgets, useCategories, useCategoryMap, useTransactions } from '../lib/hooks';
+import { useBudgetsQuery, useCategories, useCategoryMap, useTransactions } from '../lib/hooks';
 import { budgetProgress, budgetSummary, byCategory, inMonth, totals } from '../lib/stats';
-import type { Transaction } from '../types';
+import type { Budget, Transaction } from '../types';
 import type { PageId } from '../App';
 
 interface Props {
@@ -17,11 +18,24 @@ interface Props {
   navigate: (p: PageId) => void;
 }
 
-export function Dashboard({ month, setMonth, onEdit, navigate }: Props) {
-  const all = useTransactions() ?? [];
+export function Dashboard(props: Props) {
+  const all = useTransactions();
+  const budgets = useBudgetsQuery(props.month);
+  // Until IndexedDB answers, show placeholders rather than GH₵0.00 and "nothing recorded" messages.
+  if (!all || !budgets) return <DashboardSkeleton />;
+  return <DashboardContent {...props} all={all} budgets={budgets} />;
+}
+
+function DashboardContent({
+  month,
+  setMonth,
+  onEdit,
+  navigate,
+  all,
+  budgets,
+}: Props & { all: Transaction[]; budgets: Budget[] }) {
   const categories = useCategories();
   const catMap = useCategoryMap(categories);
-  const budgets = useBudgets(month);
 
   const monthTxs = useMemo(() => inMonth(all, month), [all, month]);
   const sum = useMemo(() => totals(monthTxs), [monthTxs]);

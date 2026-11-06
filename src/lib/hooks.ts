@@ -13,8 +13,13 @@ export function useTransactions(): Transaction[] | undefined {
   return useLiveQuery(() => db.transactions.orderBy('date').reverse().toArray(), []);
 }
 
+/** A month's budgets, or `undefined` while they load (so a page can tell "loading" from "none set"). */
+export function useBudgetsQuery(month: string): Budget[] | undefined {
+  return useLiveQuery(() => db.budgets.where('month').equals(month).toArray(), [month]);
+}
+
 export function useBudgets(month: string): Budget[] {
-  return useLiveQuery(() => db.budgets.where('month').equals(month).toArray(), [month]) ?? EMPTY;
+  return useBudgetsQuery(month) ?? EMPTY;
 }
 
 export function useCategoryMap(categories: Category[]) {
