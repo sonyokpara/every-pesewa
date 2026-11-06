@@ -1,4 +1,4 @@
-# Cedi Tracker
+# Every Pesewa
 
 A personal finance / expense tracker that runs entirely in your browser. Amounts are in Ghanaian Cedi (GH₵).
 Your data is stored locally in IndexedDB and never leaves your device.

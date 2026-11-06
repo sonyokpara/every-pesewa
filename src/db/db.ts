@@ -70,7 +70,7 @@ export async function restoreBackup(data: Backup) {
     !Array.isArray(data.categories) ||
     !Array.isArray(data.budgets)
   ) {
-    throw new Error('This file is not a valid Cedi Tracker backup.');
+    throw new Error('This file is not a valid Every Pesewa backup.');
   }
   await db.transaction('rw', db.transactions, db.categories, db.budgets, async () => {
     await db.transactions.clear();

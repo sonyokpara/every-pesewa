@@ -28,11 +28,11 @@ export function Settings() {
 
   async function exportCsv() {
     const txs = await db.transactions.toArray();
-    downloadFile(`cedi-tracker-${todayISO()}.csv`, exportTransactionsCsv(txs, categories), 'text/csv');
+    downloadFile(`every-pesewa-${todayISO()}.csv`, exportTransactionsCsv(txs, categories), 'text/csv');
   }
 
   async function backup() {
-    downloadFile(`cedi-tracker-backup-${todayISO()}.json`, JSON.stringify(await exportBackup(), null, 2), 'application/json');
+    downloadFile(`every-pesewa-backup-${todayISO()}.json`, JSON.stringify(await exportBackup(), null, 2), 'application/json');
   }
 
   async function onRestoreFile(e: ChangeEvent<HTMLInputElement>) {
@@ -44,7 +44,7 @@ export function Settings() {
       if (data?.version !== 1 || !Array.isArray(data.transactions)) throw new Error();
       setPendingRestore(data);
     } catch {
-      setNotice({ kind: 'error', text: 'That file is not a valid Cedi Tracker backup.' });
+      setNotice({ kind: 'error', text: 'That file is not a valid Every Pesewa backup.' });
     }
   }
 

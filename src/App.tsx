@@ -92,7 +92,7 @@ export default function App() {
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
           <a href="#dashboard" className="flex items-center gap-2 font-bold">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-lg text-white">₵</span>
-            <span className="hidden sm:inline">Cedi Tracker</span>
+            <span className="hidden sm:inline">Every Pesewa</span>
           </a>
           <nav className="hidden flex-1 gap-1 md:flex">
             {NAV.map((n) => (

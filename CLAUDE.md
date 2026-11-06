@@ -20,7 +20,7 @@ After every change, commit it and push to GitHub (`origin`, branch `main`). Writ
 
 ## What this is
 
-"Cedi Tracker" is a client-only React 18 + TypeScript + Vite expense tracker. It has no backend. All data lives in the browser's IndexedDB through Dexie. Currency is Ghanaian Cedi (GHS).
+"Every Pesewa" (formerly "Cedi Tracker", package `every-pesewa`) is a client-only React 18 + TypeScript + Vite expense tracker. It has no backend. All data lives in the browser's IndexedDB through Dexie. Currency is Ghanaian Cedi (GHS).
 
 ## Architecture
 
@@ -28,7 +28,7 @@ After every change, commit it and push to GitHub (`origin`, branch `main`). Writ
 
 **Dates are strings.** Transactions use ISO `YYYY-MM-DD`, and budgets and the month pickers use `YYYY-MM`. Month filtering works by string prefix (`inMonth` uses `date.startsWith(month)`), so keep these formats exact. The CSV import reads ambiguous dates day-first.
 
-**Data layer (`src/db/db.ts`).** It holds the Dexie schema (`transactions`, `categories`, `budgets`; budgets have a unique `[categoryId+month]` index). Default categories are seeded in the `populate` hook. Operations that touch more than one table are helpers here and run inside `db.transaction('rw', ...)`: `applyImport` (creates missing categories, matched by case-insensitive name and type), `deleteCategory` (moves that category's transactions to the type's "Other" fallback and deletes its budgets), `restoreBackup`, `clearAllData`, `copyBudgets`, and `setBudget`. If you change the schema, add a new `db.version(n)` rather than editing version 1, because users already have existing databases.
+**Data layer (`src/db/db.ts`).** The Dexie database name `'cedi-tracker'` and the backup `app: 'cedi-tracker'` marker are legacy identifiers kept on purpose: renaming them would orphan users' existing data and break old backups. It holds the Dexie schema (`transactions`, `categories`, `budgets`; budgets have a unique `[categoryId+month]` index). Default categories are seeded in the `populate` hook. Operations that touch more than one table are helpers here and run inside `db.transaction('rw', ...)`: `applyImport` (creates missing categories, matched by case-insensitive name and type), `deleteCategory` (moves that category's transactions to the type's "Other" fallback and deletes its budgets), `restoreBackup`, `clearAllData`, `copyBudgets`, and `setBudget`. If you change the schema, add a new `db.version(n)` rather than editing version 1, because users already have existing databases.
 
 **Reactivity.** The UI reads data through `useLiveQuery` hooks in `src/lib/hooks.ts` (`useTransactions`, `useCategories`, `useBudgets`). Components write to `db` directly and the live queries re-render automatically, so there is no global state store. `useTransactions` returns `undefined` while loading; the other hooks return a shared empty array.
 
