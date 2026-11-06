@@ -3,6 +3,7 @@ import { useState, type ChangeEvent } from 'react';
 import { CsvImportDialog } from '../components/CsvImportDialog';
 import { ConfirmDialog, Modal } from '../components/Modal';
 import { PALETTE, clearAllData, db, deleteCategory, exportBackup, restoreBackup, type Backup } from '../db/db';
+import { describeBackupErrors, validateBackup } from '../lib/backup';
 import { exportTransactionsCsv } from '../lib/csv';
 import { todayISO } from '../lib/format';
 import { downloadFile, useCategories } from '../lib/hooks';
@@ -39,13 +40,16 @@ export function Settings() {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
+    let parsed: unknown;
     try {
-      const data = JSON.parse(await file.text()) as Backup;
-      if (data?.version !== 1 || !Array.isArray(data.transactions)) throw new Error();
-      setPendingRestore(data);
+      parsed = JSON.parse(await file.text());
     } catch {
-      setNotice({ kind: 'error', text: 'That file is not a valid Every Pesewa backup.' });
+      setNotice({ kind: 'error', text: "That file isn't a valid Every Pesewa backup (it isn't readable JSON)." });
+      return;
     }
+    const result = validateBackup(parsed);
+    if (result.ok) setPendingRestore(result.backup);
+    else setNotice({ kind: 'error', text: describeBackupErrors(result.errors) });
   }
 
   const groups: { type: TxType; title: string }[] = [
@@ -181,8 +185,13 @@ export function Settings() {
         message={
           pendingRestore && (
             <>
-              This replaces all current data with the backup from{' '}
-              <strong>{new Date(pendingRestore.exportedAt).toLocaleString()}</strong> ({pendingRestore.transactions.length} transactions).
+              This replaces all current data with the backup
+              {!Number.isNaN(Date.parse(pendingRestore.exportedAt)) && (
+                <>
+                  {' '}from <strong>{new Date(pendingRestore.exportedAt).toLocaleString()}</strong>
+                </>
+              )}{' '}
+              ({pendingRestore.transactions.length} transactions).
             </>
           )
         }

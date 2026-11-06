@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type { Budget, Category, Transaction } from '../types';
+import { describeBackupErrors, validateBackup } from '../lib/backup';
 import type { ImportRow } from '../lib/csv';
 
 export const db = new Dexie('cedi-tracker') as Dexie & {
@@ -63,15 +64,11 @@ export async function exportBackup(): Promise<Backup> {
   };
 }
 
-export async function restoreBackup(data: Backup) {
-  if (
-    data?.version !== 1 ||
-    !Array.isArray(data.transactions) ||
-    !Array.isArray(data.categories) ||
-    !Array.isArray(data.budgets)
-  ) {
-    throw new Error('This file is not a valid Every Pesewa backup.');
-  }
+/** Replace all data with a backup. Validates every record first; on failure nothing is changed. */
+export async function restoreBackup(raw: unknown) {
+  const result = validateBackup(raw);
+  if (!result.ok) throw new Error(describeBackupErrors(result.errors));
+  const data = result.backup;
   await db.transaction('rw', db.transactions, db.categories, db.budgets, async () => {
     await db.transactions.clear();
     await db.categories.clear();
