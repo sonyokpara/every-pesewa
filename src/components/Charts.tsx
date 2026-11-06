@@ -16,9 +16,15 @@ const tooltipStyle = {
 export function CategoryDonut({ data, height = 240, showLegend = true }: { data: CategoryTotal[]; height?: number; showLegend?: boolean }) {
   if (!data.length) return <p className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">No spending in this period.</p>;
   const total = data.reduce((s, d) => s + d.total, 0);
+  const totalText = formatMoney(total);
+  // The SVG is unreadable to screen readers and its amounts only appear on hover, so give the
+  // chart a text summary of every slice.
+  const summary = `Spending by category, ${totalText} in total: ${data
+    .map((d) => `${d.name} ${formatMoney(d.total)} (${Math.round(d.share * 100)}%)`)
+    .join(', ')}.`;
   return (
     <div className={showLegend ? 'grid items-center gap-4 sm:grid-cols-2' : ''}>
-      <div className="relative" style={{ height }}>
+      <div className="relative" style={{ height }} role="img" aria-label={summary}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie data={data} dataKey="total" nameKey="name" innerRadius="62%" outerRadius="92%" paddingAngle={1.5} strokeWidth={0}>
@@ -29,9 +35,12 @@ export function CategoryDonut({ data, height = 240, showLegend = true }: { data:
             <Tooltip formatter={(v) => formatMoney(Number(v))} {...tooltipStyle} />
           </PieChart>
         </ResponsiveContainer>
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center" aria-hidden>
           <span className="text-xs text-slate-500 dark:text-slate-400">Total spent</span>
-          <span className="text-lg font-bold tabular-nums">{formatMoneyCompact(total)}</span>
+          {/* Full amount, matching the Expenses card; shrink long figures to fit inside the ring. */}
+          <span className={`font-bold tabular-nums ${totalText.length > 13 ? 'text-xs' : totalText.length > 10 ? 'text-sm' : 'text-lg'}`}>
+            {totalText}
+          </span>
         </div>
       </div>
       {showLegend && (
