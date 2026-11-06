@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
+import { PageErrorBoundary } from './components/PageErrorBoundary';
 import { TransactionForm } from './components/TransactionForm';
 import { currentMonth } from './lib/format';
 import type { Transaction } from './types';
@@ -129,13 +130,16 @@ export default function App() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-6">
-        <Suspense fallback={<p className="py-12 text-center text-sm text-slate-500">Loading…</p>}>
-          {page === 'dashboard' && <Dashboard month={month} setMonth={setMonth} onEdit={openEdit} navigate={navigate} />}
-          {page === 'transactions' && <Transactions onEdit={openEdit} />}
-          {page === 'budgets' && <Budgets month={month} setMonth={setMonth} />}
-          {page === 'reports' && <Reports />}
-          {page === 'settings' && <Settings />}
-        </Suspense>
+        {/* Keyed by page so moving to another page clears a previous error. */}
+        <PageErrorBoundary key={page}>
+          <Suspense fallback={<p className="py-12 text-center text-sm text-slate-500">Loading…</p>}>
+            {page === 'dashboard' && <Dashboard month={month} setMonth={setMonth} onEdit={openEdit} navigate={navigate} />}
+            {page === 'transactions' && <Transactions onEdit={openEdit} />}
+            {page === 'budgets' && <Budgets month={month} setMonth={setMonth} />}
+            {page === 'reports' && <Reports />}
+            {page === 'settings' && <Settings />}
+          </Suspense>
+        </PageErrorBoundary>
       </main>
 
       {/* Mobile bottom nav */}
