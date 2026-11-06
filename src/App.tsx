@@ -76,19 +76,21 @@ export default function App() {
   }, []);
   const closeForm = useCallback(() => setFormOpen(false), []);
 
-  // Keyboard shortcut: "n" adds a transaction.
+  // Keyboard shortcut: "n" (either case) adds a transaction, unless the user is typing or any
+  // dialog is open (e.g. the delete confirmation, which the form would otherwise stack on).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement;
-      if (e.key === 'n' && !formOpen && !e.ctrlKey && !e.metaKey && !['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)) {
-        e.preventDefault();
-        setEditing(null);
-        setFormOpen(true);
-      }
+      if (e.key.toLowerCase() !== 'n' || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable) return;
+      if (document.querySelector('dialog[open]')) return;
+      e.preventDefault();
+      setEditing(null);
+      setFormOpen(true);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [formOpen]);
+  }, []);
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
@@ -124,8 +126,14 @@ export default function App() {
             >
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
-            <button className="btn-primary" onClick={openAdd} title="Add transaction (N)">
+            <button className="btn-primary" onClick={openAdd} title="Add transaction (N)" aria-keyshortcuts="n">
               + Add
+              <kbd
+                aria-hidden
+                className="ml-1 hidden rounded border border-white/40 px-1 font-sans text-[11px] leading-4 text-white/90 md:inline-block"
+              >
+                N
+              </kbd>
             </button>
           </div>
         </div>
