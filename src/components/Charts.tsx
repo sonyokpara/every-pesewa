@@ -1,5 +1,6 @@
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { formatMoney, formatMoneyCompact } from '../lib/format';
+import { usePrefersReducedMotion } from '../lib/hooks';
 import type { CategoryTotal, MonthPoint } from '../lib/stats';
 
 const tooltipStyle = {
@@ -14,6 +15,7 @@ const tooltipStyle = {
 };
 
 export function CategoryDonut({ data, height = 240, showLegend = true }: { data: CategoryTotal[]; height?: number; showLegend?: boolean }) {
+  const reducedMotion = usePrefersReducedMotion();
   if (!data.length) return <p className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">No spending in this period.</p>;
   const total = data.reduce((s, d) => s + d.total, 0);
   const totalText = formatMoney(total);
@@ -27,7 +29,7 @@ export function CategoryDonut({ data, height = 240, showLegend = true }: { data:
       <div className="relative" style={{ height }} role="img" aria-label={summary}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <Pie data={data} dataKey="total" nameKey="name" innerRadius="62%" outerRadius="92%" paddingAngle={1.5} strokeWidth={0}>
+            <Pie data={data} dataKey="total" nameKey="name" innerRadius="62%" outerRadius="92%" paddingAngle={1.5} strokeWidth={0} isAnimationActive={!reducedMotion}>
               {data.map((d) => (
                 <Cell key={d.categoryId} fill={d.color} />
               ))}
@@ -62,6 +64,7 @@ export function CategoryDonut({ data, height = 240, showLegend = true }: { data:
 }
 
 export function MonthlyBars({ data, height = 300 }: { data: MonthPoint[]; height?: number }) {
+  const reducedMotion = usePrefersReducedMotion();
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -77,8 +80,8 @@ export function MonthlyBars({ data, height = 300 }: { data: MonthPoint[]; height
           />
           <Tooltip formatter={(v) => formatMoney(Number(v))} cursor={{ fill: 'rgb(148 163 184 / 0.12)' }} {...tooltipStyle} />
           <Legend wrapperStyle={{ fontSize: 13 }} />
-          <Bar dataKey="income" name="Income" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={28} />
-          <Bar dataKey="expense" name="Expenses" fill="#f43f5e" radius={[4, 4, 0, 0]} maxBarSize={28} />
+          <Bar dataKey="income" name="Income" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={28} isAnimationActive={!reducedMotion} />
+          <Bar dataKey="expense" name="Expenses" fill="#f43f5e" radius={[4, 4, 0, 0]} maxBarSize={28} isAnimationActive={!reducedMotion} />
         </BarChart>
       </ResponsiveContainer>
     </div>

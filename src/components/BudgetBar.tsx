@@ -1,7 +1,7 @@
 import { formatMoney } from '../lib/format';
 import type { BudgetProgress, BudgetStatus } from '../lib/stats';
 
-const BAR = { ok: 'bg-emerald-500', warn: 'bg-amber-500', over: 'bg-rose-500' } as const;
+const BAR = { ok: 'bg-emerald-500', warn: 'bg-amber-600 dark:bg-amber-500', over: 'bg-rose-500' } as const;
 const TEXT = {
   ok: 'text-slate-500 dark:text-slate-400',
   warn: 'text-amber-700 dark:text-amber-400',
@@ -38,7 +38,7 @@ export function BudgetBar({ p }: { p: BudgetProgress }) {
         aria-valuetext={valueText(p.spent, p.budget.limit)}
         aria-label={`${p.category?.name ?? 'Unknown'} budget`}
       >
-        <div className={`h-full rounded-full transition-all ${BAR[p.status]}`} style={{ width: `${width}%` }} />
+        <div className={`h-full rounded-full transition-all motion-reduce:transition-none ${BAR[p.status]}`} style={{ width: `${width}%` }} />
       </div>
       <p className={`mt-1 text-xs ${TEXT[p.status]}`}>
         {p.status === 'over'
@@ -62,7 +62,7 @@ export function BudgetTotalBar({ spent, limit, status, label }: { spent: number;
       aria-valuetext={valueText(spent, limit)}
       aria-label={label}
     >
-      <div className={`h-full rounded-full transition-all ${BAR[status]}`} style={{ width: `${Math.min(100, pct * 100)}%` }} />
+      <div className={`h-full rounded-full transition-all motion-reduce:transition-none ${BAR[status]}`} style={{ width: `${Math.min(100, pct * 100)}%` }} />
     </div>
   );
 }

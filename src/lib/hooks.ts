@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { db } from '../db/db';
 import type { Budget, Category, Transaction } from '../types';
 
@@ -20,6 +20,20 @@ export function useBudgetsQuery(month: string): Budget[] | undefined {
 
 export function useBudgets(month: string): Budget[] {
   return useBudgetsQuery(month) ?? EMPTY;
+}
+
+const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
+
+/** True when the user asked the OS for less motion; updates if they change the setting. */
+export function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(() => window.matchMedia(REDUCED_MOTION).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(REDUCED_MOTION);
+    const onChange = () => setReduced(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return reduced;
 }
 
 export function useCategoryMap(categories: Category[]) {

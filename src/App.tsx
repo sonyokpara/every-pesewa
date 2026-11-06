@@ -153,7 +153,8 @@ export default function App() {
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-slate-200 bg-white/95 backdrop-blur md:hidden dark:border-slate-800 dark:bg-slate-950/95" aria-label="Main">
+      {/* Bottom padding keeps the links clear of the iPhone home indicator (needs viewport-fit=cover). */}
+      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t pb-[env(safe-area-inset-bottom)] border-slate-200 bg-white/95 backdrop-blur md:hidden dark:border-slate-800 dark:bg-slate-950/95" aria-label="Main">
         {NAV.map((n) => (
           <a
             key={n.id}

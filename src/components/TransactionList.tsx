@@ -53,7 +53,8 @@ export function TransactionList({ transactions, categoryMap, onEdit, emptyMessag
                 {t.type === 'income' ? '+' : '−'}
                 {formatMoney(t.amount)}
               </span>
-              <div className="flex shrink-0 gap-1 sm:opacity-0 sm:transition sm:group-hover:opacity-100 sm:focus-within:opacity-100">
+              {/* Hide-until-hover only where hover exists; touch tablets always see the actions. */}
+              <div className="flex shrink-0 gap-1 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:transition [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-within:opacity-100">
                 <button
                   className="btn px-2 py-1 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                   onClick={() => onEdit(t)}
