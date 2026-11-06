@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
-import { BudgetBar } from '../components/BudgetBar';
+import { BudgetBar, BudgetTotalBar } from '../components/BudgetBar';
 import { CategoryDonut } from '../components/Charts';
 import { MonthPicker } from '../components/MonthPicker';
 import { SummaryCards } from '../components/SummaryCards';
 import { TransactionList } from '../components/TransactionList';
-import { monthLabel } from '../lib/format';
+import { formatMoney, monthLabel } from '../lib/format';
 import { useBudgets, useCategories, useCategoryMap, useTransactions } from '../lib/hooks';
-import { budgetProgress, byCategory, inMonth, totals } from '../lib/stats';
+import { budgetProgress, budgetSummary, byCategory, inMonth, totals } from '../lib/stats';
 import type { Transaction } from '../types';
 import type { PageId } from '../App';
 
@@ -27,7 +27,7 @@ export function Dashboard({ month, setMonth, onEdit, navigate }: Props) {
   const sum = useMemo(() => totals(monthTxs), [monthTxs]);
   const spending = useMemo(() => byCategory(monthTxs, categories), [monthTxs, categories]);
   const progress = useMemo(() => budgetProgress(budgets, monthTxs, categories), [budgets, monthTxs, categories]);
-  const alerts = progress.filter((p) => p.status !== 'ok');
+  const budget = useMemo(() => budgetSummary(progress, monthTxs), [progress, monthTxs]);
   const recent = useMemo(
     () => [...monthTxs].sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt).slice(0, 6),
     [monthTxs],
@@ -41,6 +41,56 @@ export function Dashboard({ month, setMonth, onEdit, navigate }: Props) {
       </div>
 
       <SummaryCards totals={sum} label={monthLabel(month)} />
+
+      <section className="card" aria-labelledby="budgets-heading">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 id="budgets-heading" className="font-semibold">
+            Monthly budgets <span className="font-normal text-slate-500">· {monthLabel(month)}</span>
+          </h2>
+          <button className="text-sm text-emerald-700 hover:underline dark:text-emerald-400" onClick={() => navigate('budgets')}>
+            {progress.length ? 'Edit budgets →' : 'Set budgets →'}
+          </button>
+        </div>
+        {!progress.length ? (
+          <p className="text-sm text-slate-500">
+            No spending limits set for {monthLabel(month)}. Set a monthly limit per category to track your spending against it here.
+          </p>
+        ) : (
+          <>
+            <div className="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
+              <span>
+                <span className="text-lg font-bold tabular-nums">{formatMoney(budget.spent)}</span>
+                <span className="text-slate-500"> spent of {formatMoney(budget.limit)}</span>
+              </span>
+              <span className={budget.remaining < 0 ? 'font-medium text-rose-600 dark:text-rose-400' : 'text-slate-500'}>
+                {budget.remaining < 0 ? `${formatMoney(-budget.remaining)} over` : `${formatMoney(budget.remaining)} left`}
+              </span>
+            </div>
+            <BudgetTotalBar spent={budget.spent} limit={budget.limit} status={budget.status} label="Total budget used" />
+            {(budget.overCount > 0 || budget.warnCount > 0) && (
+              <p className="mt-1.5 text-xs">
+                {budget.overCount > 0 && (
+                  <span className="font-medium text-rose-600 dark:text-rose-400">{budget.overCount} over budget</span>
+                )}
+                {budget.overCount > 0 && budget.warnCount > 0 && <span className="text-slate-400"> · </span>}
+                {budget.warnCount > 0 && (
+                  <span className="text-amber-600 dark:text-amber-400">{budget.warnCount} near the limit</span>
+                )}
+              </p>
+            )}
+            <div className="mt-5 grid gap-x-8 gap-y-4 sm:grid-cols-2">
+              {progress.map((p) => (
+                <BudgetBar key={p.budget.id} p={p} />
+              ))}
+            </div>
+            {budget.unbudgetedSpent > 0 && (
+              <p className="mt-4 border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-slate-800">
+                Plus {formatMoney(budget.unbudgetedSpent)} spent in categories without a budget.
+              </p>
+            )}
+          </>
+        )}
+      </section>
 
       <div className="grid gap-5 lg:grid-cols-5">
         <section className="card lg:col-span-3">
@@ -72,28 +122,6 @@ export function Dashboard({ month, setMonth, onEdit, navigate }: Props) {
                   </li>
                 ))}
               </ul>
-            )}
-          </section>
-
-          <section className="card">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-semibold">Budget alerts</h2>
-              <button className="text-sm text-emerald-700 hover:underline dark:text-emerald-400" onClick={() => navigate('budgets')}>
-                Budgets →
-              </button>
-            </div>
-            {!budgets.length ? (
-              <p className="text-sm text-slate-500">No budgets set for this month.</p>
-            ) : alerts.length ? (
-              <div className="space-y-4">
-                {alerts.map((p) => (
-                  <BudgetBar key={p.budget.id} p={p} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-emerald-700 dark:text-emerald-400">
-                ✅ All {budgets.length} budget{budgets.length === 1 ? ' is' : 's are'} on track.
-              </p>
             )}
           </section>
         </div>

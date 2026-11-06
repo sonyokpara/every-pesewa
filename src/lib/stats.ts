@@ -121,3 +121,41 @@ export function budgetProgress(budgets: Budget[], txs: Transaction[], categories
     })
     .sort((a, b) => b.pct - a.pct);
 }
+
+export interface BudgetSummary {
+  /** Sum of all budget limits, in pesewas. */
+  limit: number;
+  /** Spending in budgeted categories, in pesewas. */
+  spent: number;
+  remaining: number;
+  pct: number;
+  status: BudgetStatus;
+  overCount: number;
+  warnCount: number;
+  /** Expense spending in categories that have no budget this month. */
+  unbudgetedSpent: number;
+}
+
+/**
+ * Roll budget progress up into one month-level figure. `monthTxs` must be the
+ * transactions of the same month the budgets belong to.
+ */
+export function budgetSummary(progress: BudgetProgress[], monthTxs: Transaction[]): BudgetSummary {
+  const limit = progress.reduce((s, p) => s + p.budget.limit, 0);
+  const spent = progress.reduce((s, p) => s + p.spent, 0);
+  const budgeted = new Set(progress.map((p) => p.budget.categoryId));
+  let unbudgetedSpent = 0;
+  for (const t of monthTxs) {
+    if (t.type === 'expense' && !budgeted.has(t.categoryId)) unbudgetedSpent += t.amount;
+  }
+  return {
+    limit,
+    spent,
+    remaining: limit - spent,
+    pct: limit > 0 ? spent / limit : 0,
+    status: budgetStatus(spent, limit),
+    overCount: progress.filter((p) => p.status === 'over').length,
+    warnCount: progress.filter((p) => p.status === 'warn').length,
+    unbudgetedSpent,
+  };
+}

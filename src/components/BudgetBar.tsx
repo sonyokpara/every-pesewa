@@ -1,5 +1,5 @@
 import { formatMoney } from '../lib/format';
-import type { BudgetProgress } from '../lib/stats';
+import type { BudgetProgress, BudgetStatus } from '../lib/stats';
 
 const BAR = { ok: 'bg-emerald-500', warn: 'bg-amber-500', over: 'bg-rose-500' } as const;
 const TEXT = {
@@ -35,6 +35,23 @@ export function BudgetBar({ p }: { p: BudgetProgress }) {
           ? `Over budget by ${formatMoney(-p.remaining)}`
           : `${formatMoney(p.remaining)} left · ${Math.round(p.pct * 100)}% used`}
       </p>
+    </div>
+  );
+}
+
+/** Thicker bar for the whole month: all budgeted spending against the sum of all limits. */
+export function BudgetTotalBar({ spent, limit, status, label }: { spent: number; limit: number; status: BudgetStatus; label: string }) {
+  const pct = limit > 0 ? spent / limit : 0;
+  return (
+    <div
+      className="h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(pct * 100)}
+      aria-label={label}
+    >
+      <div className={`h-full rounded-full transition-all ${BAR[status]}`} style={{ width: `${Math.min(100, pct * 100)}%` }} />
     </div>
   );
 }

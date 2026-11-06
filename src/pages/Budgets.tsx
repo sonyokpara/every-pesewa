@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BudgetBar } from '../components/BudgetBar';
+import { BudgetBar, BudgetTotalBar } from '../components/BudgetBar';
 import { MonthPicker } from '../components/MonthPicker';
 import { copyBudgets, setBudget } from '../db/db';
 import { formatMoney, monthLabel, parseAmount, shiftMonth, toDecimal } from '../lib/format';
 import { useBudgets, useCategories, useTransactions } from '../lib/hooks';
-import { budgetProgress, byCategory, inMonth } from '../lib/stats';
+import { budgetProgress, budgetSummary, byCategory, inMonth } from '../lib/stats';
 import type { Category } from '../types';
 
 export function Budgets({ month, setMonth }: { month: string; setMonth: (m: string) => void }) {
@@ -19,8 +19,7 @@ export function Budgets({ month, setMonth }: { month: string; setMonth: (m: stri
   const spentBy = useMemo(() => new Map(byCategory(monthTxs, categories).map((c) => [c.categoryId, c.total])), [monthTxs, categories]);
   const expenseCats = categories.filter((c) => c.type === 'expense').sort((a, b) => a.name.localeCompare(b.name));
 
-  const totalLimit = budgets.reduce((s, b) => s + b.limit, 0);
-  const totalSpent = progress.reduce((s, p) => s + p.spent, 0);
+  const summary = useMemo(() => budgetSummary(progress, monthTxs), [progress, monthTxs]);
 
   useEffect(() => setMessage(''), [month]);
 
@@ -40,14 +39,11 @@ export function Budgets({ month, setMonth }: { month: string; setMonth: (m: stri
         <section className="card">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Total budgeted for {monthLabel(month)}</p>
           <div className="mt-1 flex flex-wrap items-baseline gap-x-3">
-            <span className="text-2xl font-bold tabular-nums">{formatMoney(totalSpent)}</span>
-            <span className="text-slate-500">spent of {formatMoney(totalLimit)}</span>
+            <span className="text-2xl font-bold tabular-nums">{formatMoney(summary.spent)}</span>
+            <span className="text-slate-500">spent of {formatMoney(summary.limit)}</span>
           </div>
-          <div className="mt-3 h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-            <div
-              className={`h-full rounded-full ${totalSpent > totalLimit ? 'bg-rose-500' : totalSpent >= totalLimit * 0.8 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-              style={{ width: `${Math.min(100, (totalSpent / totalLimit) * 100)}%` }}
-            />
+          <div className="mt-3">
+            <BudgetTotalBar spent={summary.spent} limit={summary.limit} status={summary.status} label="Total budget used" />
           </div>
         </section>
       )}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Budget, Category, Transaction } from '../types';
-import { budgetProgress, budgetStatus, byCategory, inMonth, monthlyTrend, totals } from './stats';
+import { budgetProgress, budgetStatus, budgetSummary, byCategory, inMonth, monthlyTrend, totals } from './stats';
 
 const cats: Category[] = [
   { id: 1, name: 'Food', type: 'expense', color: '#f00', icon: '🍲' },
@@ -81,5 +81,29 @@ describe('budgets', () => {
     const transport = res.find((r) => r.budget.categoryId === 2)!;
     expect(transport).toMatchObject({ spent: 5000, status: 'ok', pct: 0.5 });
     expect(res[0].budget.categoryId).toBe(1); // sorted by pct desc
+  });
+
+  it('summarises a month of budgets', () => {
+    const extra = [...txs, tx('expense', 4000, 99, '2026-10-21')]; // a category with no budget
+    const budgets: Budget[] = [
+      { id: 1, categoryId: 1, month: '2026-10', limit: 15000 },
+      { id: 2, categoryId: 2, month: '2026-10', limit: 10000 },
+    ];
+    const month = inMonth(extra, '2026-10');
+    const s = budgetSummary(budgetProgress(budgets, month, cats), month);
+    expect(s).toEqual({
+      limit: 25000,
+      spent: 25000,
+      remaining: 0,
+      pct: 1,
+      status: 'warn',
+      overCount: 1,
+      warnCount: 0,
+      unbudgetedSpent: 4000,
+    });
+  });
+
+  it('summarises an empty month without dividing by zero', () => {
+    expect(budgetSummary([], [])).toMatchObject({ limit: 0, spent: 0, pct: 0, status: 'ok', overCount: 0 });
   });
 });
