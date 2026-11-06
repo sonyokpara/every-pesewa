@@ -246,7 +246,7 @@ function CategoryEditor({ category, onClose, existing }: { category: Category | 
           <label className="label" htmlFor="cat-name">
             Name
           </label>
-          <input id="cat-name" className="input" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} autoFocus />
+          <input id="cat-name" className="input" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} data-autofocus />
         </div>
         <div>
           <span className="label">Icon</span>

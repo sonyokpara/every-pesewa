@@ -87,7 +87,7 @@ export function TransactionForm({ open, editing, onClose }: Props) {
             placeholder="0.00"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            autoFocus
+            data-autofocus
           />
         </div>
 
