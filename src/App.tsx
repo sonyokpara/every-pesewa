@@ -1,12 +1,15 @@
-import { useCallback, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { TransactionForm } from './components/TransactionForm';
 import { currentMonth } from './lib/format';
-import { Budgets } from './pages/Budgets';
-import { Dashboard } from './pages/Dashboard';
-import { Reports } from './pages/Reports';
-import { Settings } from './pages/Settings';
-import { Transactions } from './pages/Transactions';
 import type { Transaction } from './types';
+
+// Pages are code-split so each one (and Recharts, used only by Dashboard and
+// Reports) downloads on first visit instead of in one large initial bundle.
+const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })));
+const Transactions = lazy(() => import('./pages/Transactions').then((m) => ({ default: m.Transactions })));
+const Budgets = lazy(() => import('./pages/Budgets').then((m) => ({ default: m.Budgets })));
+const Reports = lazy(() => import('./pages/Reports').then((m) => ({ default: m.Reports })));
+const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m.Settings })));
 
 export type PageId = 'dashboard' | 'transactions' | 'budgets' | 'reports' | 'settings';
 
@@ -126,11 +129,13 @@ export default function App() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-6">
-        {page === 'dashboard' && <Dashboard month={month} setMonth={setMonth} onEdit={openEdit} navigate={navigate} />}
-        {page === 'transactions' && <Transactions onEdit={openEdit} />}
-        {page === 'budgets' && <Budgets month={month} setMonth={setMonth} />}
-        {page === 'reports' && <Reports />}
-        {page === 'settings' && <Settings />}
+        <Suspense fallback={<p className="py-12 text-center text-sm text-slate-500">Loading…</p>}>
+          {page === 'dashboard' && <Dashboard month={month} setMonth={setMonth} onEdit={openEdit} navigate={navigate} />}
+          {page === 'transactions' && <Transactions onEdit={openEdit} />}
+          {page === 'budgets' && <Budgets month={month} setMonth={setMonth} />}
+          {page === 'reports' && <Reports />}
+          {page === 'settings' && <Settings />}
+        </Suspense>
       </main>
 
       {/* Mobile bottom nav */}
