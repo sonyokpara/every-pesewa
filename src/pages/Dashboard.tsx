@@ -63,12 +63,12 @@ function DashboardContent({
         <MonthPicker month={month} onChange={setMonth} />
       </div>
 
-      <SummaryCards totals={sum} label={monthLabel(month)} />
+      <SummaryCards totals={sum} />
 
       <section className="card" aria-labelledby="budgets-heading">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 id="budgets-heading" className="font-semibold">
-            Monthly budgets <span className="font-normal text-slate-500 dark:text-slate-400">· {monthLabel(month)}</span>
+            Monthly budgets
           </h2>
           <a href="#budgets" className="inline-block py-1 text-sm text-emerald-700 hover:underline dark:text-emerald-400">
             {progress.length ? 'Edit budgets' : 'Set budgets'} <span aria-hidden>→</span>
