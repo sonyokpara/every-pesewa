@@ -24,7 +24,7 @@ export function DashboardSkeleton() {
           <Block className="h-8 w-36" />
           <Block className="h-9 w-52" />
         </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           {[0, 1, 2].map((i) => (
             <div key={i} className="card space-y-2">
               <Block className="h-3 w-24" />
