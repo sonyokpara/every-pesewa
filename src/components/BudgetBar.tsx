@@ -8,6 +8,15 @@ const TEXT = {
   over: 'text-rose-600 dark:text-rose-400 font-medium',
 } as const;
 
+/**
+ * Screen-reader text for a budget bar. aria-valuenow is capped at 100 (a value above aria-valuemax
+ * is invalid), so the money figures carry the real state, including how far over the limit it is.
+ */
+function valueText(spent: number, limit: number) {
+  const base = `${formatMoney(spent)} of ${formatMoney(limit)} spent`;
+  return spent > limit ? `${base}, over by ${formatMoney(spent - limit)}` : base;
+}
+
 export function BudgetBar({ p }: { p: BudgetProgress }) {
   const width = Math.min(100, p.pct * 100);
   return (
@@ -25,8 +34,9 @@ export function BudgetBar({ p }: { p: BudgetProgress }) {
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-valuenow={Math.round(p.pct * 100)}
-        aria-label={`${p.category?.name} budget used`}
+        aria-valuenow={Math.min(100, Math.round(p.pct * 100))}
+        aria-valuetext={valueText(p.spent, p.budget.limit)}
+        aria-label={`${p.category?.name ?? 'Unknown'} budget`}
       >
         <div className={`h-full rounded-full transition-all ${BAR[p.status]}`} style={{ width: `${width}%` }} />
       </div>
@@ -48,7 +58,8 @@ export function BudgetTotalBar({ spent, limit, status, label }: { spent: number;
       role="progressbar"
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-valuenow={Math.round(pct * 100)}
+      aria-valuenow={Math.min(100, Math.round(pct * 100))}
+      aria-valuetext={valueText(spent, limit)}
       aria-label={label}
     >
       <div className={`h-full rounded-full transition-all ${BAR[status]}`} style={{ width: `${Math.min(100, pct * 100)}%` }} />

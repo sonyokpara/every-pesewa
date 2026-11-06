@@ -99,11 +99,13 @@ export default function App() {
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-700 text-lg text-white">₵</span>
             <span className="hidden sm:inline">Every Pesewa</span>
           </a>
-          <nav className="hidden flex-1 gap-1 md:flex">
+          {/* Only one of the two navs is displayed at a time, so both can carry the same label. */}
+          <nav className="hidden flex-1 gap-1 md:flex" aria-label="Main">
             {NAV.map((n) => (
               <a
                 key={n.id}
                 href={`#${n.id}`}
+                aria-current={page === n.id ? 'page' : undefined}
                 className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
                   page === n.id
                     ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
@@ -144,11 +146,12 @@ export default function App() {
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-slate-200 bg-white/95 backdrop-blur md:hidden dark:border-slate-800 dark:bg-slate-950/95">
+      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-slate-200 bg-white/95 backdrop-blur md:hidden dark:border-slate-800 dark:bg-slate-950/95" aria-label="Main">
         {NAV.map((n) => (
           <a
             key={n.id}
             href={`#${n.id}`}
+            aria-current={page === n.id ? 'page' : undefined}
             className={`flex flex-col items-center gap-0.5 py-2 text-[11px] ${
               page === n.id ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
             }`}
