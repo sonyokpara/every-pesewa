@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { db } from '../db/db';
 import { formatDate, formatMoney } from '../lib/format';
 import type { Category, Transaction } from '../types';
@@ -9,13 +9,20 @@ interface Props {
   categoryMap: Map<number, Category>;
   onEdit: (tx: Transaction) => void;
   emptyMessage?: string;
+  /** Optional call to action shown under the empty message, e.g. an "Add" button. */
+  emptyAction?: ReactNode;
 }
 
-export function TransactionList({ transactions, categoryMap, onEdit, emptyMessage = 'No transactions yet.' }: Props) {
+export function TransactionList({ transactions, categoryMap, onEdit, emptyMessage = 'No transactions yet.', emptyAction }: Props) {
   const [deleting, setDeleting] = useState<Transaction | null>(null);
 
   if (!transactions.length) {
-    return <p className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">{emptyMessage}</p>;
+    return (
+      <div className="py-10 text-center">
+        <p className="text-sm text-slate-500 dark:text-slate-400">{emptyMessage}</p>
+        {emptyAction && <div className="mt-4">{emptyAction}</div>}
+      </div>
+    );
   }
 
   return (

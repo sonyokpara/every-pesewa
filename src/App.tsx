@@ -136,7 +136,7 @@ export default function App() {
         {/* Keyed by page so moving to another page clears a previous error. */}
         <PageErrorBoundary key={page}>
           <Suspense fallback={<PageSkeleton />}>
-            {page === 'dashboard' && <Dashboard month={month} setMonth={setMonth} onEdit={openEdit} navigate={navigate} />}
+            {page === 'dashboard' && <Dashboard month={month} setMonth={setMonth} onEdit={openEdit} onAdd={openAdd} navigate={navigate} />}
             {page === 'transactions' && <Transactions onEdit={openEdit} />}
             {page === 'budgets' && <Budgets month={month} setMonth={setMonth} />}
             {page === 'reports' && <Reports />}

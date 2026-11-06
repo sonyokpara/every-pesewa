@@ -5,8 +5,9 @@ import { MonthPicker } from '../components/MonthPicker';
 import { DashboardSkeleton } from '../components/Skeleton';
 import { SummaryCards } from '../components/SummaryCards';
 import { TransactionList } from '../components/TransactionList';
-import { formatMoney, monthLabel } from '../lib/format';
-import { useBudgetsQuery, useCategories, useCategoryMap, useTransactions } from '../lib/hooks';
+import { copyBudgets } from '../db/db';
+import { formatMoney, monthLabel, shiftMonth } from '../lib/format';
+import { useBudgets, useBudgetsQuery, useCategories, useCategoryMap, useTransactions } from '../lib/hooks';
 import { budgetProgress, budgetSummary, byCategory, inMonth, totals } from '../lib/stats';
 import type { Budget, Transaction } from '../types';
 import type { PageId } from '../App';
@@ -15,11 +16,14 @@ interface Props {
   month: string;
   setMonth: (m: string) => void;
   onEdit: (t: Transaction) => void;
+  onAdd: () => void;
   navigate: (p: PageId) => void;
 }
 
 /** How many budgets the dashboard lists before "Show all" (most-used first, so the urgent ones stay visible). */
 const BUDGETS_SHOWN = 6;
+/** How many categories the spending legend lists before "+N more". */
+const LEGEND_SHOWN = 4;
 
 export function Dashboard(props: Props) {
   const all = useTransactions();
@@ -33,6 +37,7 @@ function DashboardContent({
   month,
   setMonth,
   onEdit,
+  onAdd,
   navigate,
   all,
   budgets,
@@ -40,6 +45,9 @@ function DashboardContent({
   const categories = useCategories();
   const catMap = useCategoryMap(categories);
   const [showAllBudgets, setShowAllBudgets] = useState(false);
+  // Budgets are per month, so a new month starts empty: offer to carry last month's over.
+  const prevMonth = shiftMonth(month, -1);
+  const prevBudgets = useBudgets(prevMonth);
 
   const monthTxs = useMemo(() => inMonth(all, month), [all, month]);
   const sum = useMemo(() => totals(monthTxs), [monthTxs]);
@@ -70,9 +78,16 @@ function DashboardContent({
           </button>
         </div>
         {!progress.length ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            No spending limits set for {monthLabel(month)}. Set a monthly limit per category to track your spending against it here.
-          </p>
+          <>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              No spending limits set for {monthLabel(month)}. Set a monthly limit per category to track your spending against it here.
+            </p>
+            {prevBudgets.length > 0 && (
+              <button className="btn-primary mt-3" onClick={() => copyBudgets(prevMonth, month)}>
+                Copy {monthLabel(prevMonth)}’s {prevBudgets.length} budget{prevBudgets.length === 1 ? '' : 's'}
+              </button>
+            )}
+          </>
         ) : (
           <>
             <div className="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
@@ -120,8 +135,10 @@ function DashboardContent({
         )}
       </section>
 
-      <div className="grid gap-5 lg:grid-cols-5">
-        <section className="card lg:col-span-3">
+      {/* grid-cols-1 + min-w-0 let the cards shrink on phones; otherwise long amounts widen them past the screen. */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
+        {/* With no spending there is no chart, so the transactions card takes the full width. */}
+        <section className={`card min-w-0 ${spending.length ? 'lg:col-span-3' : 'lg:col-span-5'}`}>
           <div className="mb-2 flex items-center justify-between">
             <h2 className="font-semibold">Recent transactions</h2>
             <button className="text-sm text-emerald-700 hover:underline dark:text-emerald-400" onClick={() => navigate('transactions')}>
@@ -132,27 +149,39 @@ function DashboardContent({
             transactions={recent}
             categoryMap={catMap}
             onEdit={onEdit}
-            emptyMessage={`Nothing recorded for ${monthLabel(month)} yet. Tap “+ Add” to log your first transaction.`}
+            emptyMessage={`Nothing recorded for ${monthLabel(month)} yet.`}
+            emptyAction={
+              <button className="btn-primary" onClick={onAdd}>
+                Add a transaction
+              </button>
+            }
           />
         </section>
 
-        <div className="space-y-5 lg:col-span-2">
-          <section className="card">
+        {spending.length > 0 && (
+          <section className="card min-w-0 lg:col-span-2">
             <h2 className="mb-2 font-semibold">Spending by category</h2>
             <CategoryDonut data={spending} height={200} showLegend={false} />
-            {spending.length > 0 && (
-              <ul className="mt-3 space-y-1">
-                {spending.slice(0, 4).map((s) => (
-                  <li key={s.categoryId} className="flex items-center gap-2 text-sm">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: s.color }} />
-                    <span className="flex-1 truncate">{s.name}</span>
-                    <span className="tabular-nums text-slate-500 dark:text-slate-400">{Math.round(s.share * 100)}%</span>
-                  </li>
-                ))}
-              </ul>
+            <ul className="mt-3 space-y-1">
+              {spending.slice(0, LEGEND_SHOWN).map((s) => (
+                <li key={s.categoryId} className="flex items-center gap-2 text-sm">
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: s.color }} />
+                  <span className="flex-1 truncate">{s.name}</span>
+                  <span className="tabular-nums text-slate-500 dark:text-slate-400">{Math.round(s.share * 100)}%</span>
+                  <span className="text-right font-medium tabular-nums">{formatMoney(s.total)}</span>
+                </li>
+              ))}
+            </ul>
+            {spending.length > LEGEND_SHOWN && (
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                +{spending.length - LEGEND_SHOWN} more {spending.length - LEGEND_SHOWN === 1 ? 'category' : 'categories'} ·{' '}
+                <button className="py-1 text-emerald-700 hover:underline dark:text-emerald-400" onClick={() => navigate('reports')}>
+                  See report →
+                </button>
+              </p>
             )}
           </section>
-        </div>
+        )}
       </div>
     </div>
   );
