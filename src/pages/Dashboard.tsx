@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { BudgetBar, BudgetTotalBar } from '../components/BudgetBar';
 import { CategoryDonut } from '../components/Charts';
 import { MonthPicker } from '../components/MonthPicker';
@@ -18,6 +18,9 @@ interface Props {
   navigate: (p: PageId) => void;
 }
 
+/** How many budgets the dashboard lists before "Show all" (most-used first, so the urgent ones stay visible). */
+const BUDGETS_SHOWN = 6;
+
 export function Dashboard(props: Props) {
   const all = useTransactions();
   const budgets = useBudgetsQuery(props.month);
@@ -36,6 +39,7 @@ function DashboardContent({
 }: Props & { all: Transaction[]; budgets: Budget[] }) {
   const categories = useCategories();
   const catMap = useCategoryMap(categories);
+  const [showAllBudgets, setShowAllBudgets] = useState(false);
 
   const monthTxs = useMemo(() => inMonth(all, month), [all, month]);
   const sum = useMemo(() => totals(monthTxs), [monthTxs]);
@@ -92,11 +96,21 @@ function DashboardContent({
                 )}
               </p>
             )}
-            <div className="mt-5 grid gap-x-8 gap-y-4 sm:grid-cols-2">
-              {progress.map((p) => (
+            <div id="dashboard-budget-list" className="mt-5 grid gap-x-8 gap-y-4 sm:grid-cols-2">
+              {(showAllBudgets ? progress : progress.slice(0, BUDGETS_SHOWN)).map((p) => (
                 <BudgetBar key={p.budget.id} p={p} />
               ))}
             </div>
+            {progress.length > BUDGETS_SHOWN && (
+              <button
+                className="mt-3 py-1 text-sm text-emerald-700 hover:underline dark:text-emerald-400"
+                aria-expanded={showAllBudgets}
+                aria-controls="dashboard-budget-list"
+                onClick={() => setShowAllBudgets((v) => !v)}
+              >
+                {showAllBudgets ? 'Show fewer' : `Show all ${progress.length} budgets`}
+              </button>
+            )}
             {budget.unbudgetedSpent > 0 && (
               <p className="mt-4 border-t border-slate-100 pt-3 text-xs text-slate-500 dark:text-slate-400 dark:border-slate-800">
                 Plus {formatMoney(budget.unbudgetedSpent)} spent in categories without a budget.
