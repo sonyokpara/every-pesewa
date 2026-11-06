@@ -95,7 +95,7 @@ export default function App() {
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/85 backdrop-blur dark:border-slate-800 dark:bg-slate-950/85">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
           <a href="#dashboard" className="flex items-center gap-2 font-bold">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-lg text-white">₵</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-700 text-lg text-white">₵</span>
             <span className="hidden sm:inline">Every Pesewa</span>
           </a>
           <nav className="hidden flex-1 gap-1 md:flex">
@@ -149,7 +149,7 @@ export default function App() {
             key={n.id}
             href={`#${n.id}`}
             className={`flex flex-col items-center gap-0.5 py-2 text-[11px] ${
-              page === n.id ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'
+              page === n.id ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
             }`}
           >
             <span className="text-lg" aria-hidden>

@@ -3,8 +3,8 @@ import type { BudgetProgress, BudgetStatus } from '../lib/stats';
 
 const BAR = { ok: 'bg-emerald-500', warn: 'bg-amber-500', over: 'bg-rose-500' } as const;
 const TEXT = {
-  ok: 'text-slate-500',
-  warn: 'text-amber-600 dark:text-amber-400',
+  ok: 'text-slate-500 dark:text-slate-400',
+  warn: 'text-amber-700 dark:text-amber-400',
   over: 'text-rose-600 dark:text-rose-400 font-medium',
 } as const;
 
@@ -17,7 +17,7 @@ export function BudgetBar({ p }: { p: BudgetProgress }) {
           {p.category?.icon} {p.category?.name ?? 'Unknown'}
         </span>
         <span className="shrink-0 tabular-nums text-slate-600 dark:text-slate-300">
-          {formatMoney(p.spent)} <span className="text-slate-400">/ {formatMoney(p.budget.limit)}</span>
+          {formatMoney(p.spent)} <span className="text-slate-500 dark:text-slate-400">/ {formatMoney(p.budget.limit)}</span>
         </span>
       </div>
       <div

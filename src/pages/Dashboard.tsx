@@ -45,14 +45,14 @@ export function Dashboard({ month, setMonth, onEdit, navigate }: Props) {
       <section className="card" aria-labelledby="budgets-heading">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 id="budgets-heading" className="font-semibold">
-            Monthly budgets <span className="font-normal text-slate-500">· {monthLabel(month)}</span>
+            Monthly budgets <span className="font-normal text-slate-500 dark:text-slate-400">· {monthLabel(month)}</span>
           </h2>
           <button className="text-sm text-emerald-700 hover:underline dark:text-emerald-400" onClick={() => navigate('budgets')}>
             {progress.length ? 'Edit budgets →' : 'Set budgets →'}
           </button>
         </div>
         {!progress.length ? (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             No spending limits set for {monthLabel(month)}. Set a monthly limit per category to track your spending against it here.
           </p>
         ) : (
@@ -60,9 +60,9 @@ export function Dashboard({ month, setMonth, onEdit, navigate }: Props) {
             <div className="mb-1 flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
               <span>
                 <span className="text-lg font-bold tabular-nums">{formatMoney(budget.spent)}</span>
-                <span className="text-slate-500"> spent of {formatMoney(budget.limit)}</span>
+                <span className="text-slate-500 dark:text-slate-400"> spent of {formatMoney(budget.limit)}</span>
               </span>
-              <span className={budget.remaining < 0 ? 'font-medium text-rose-600 dark:text-rose-400' : 'text-slate-500'}>
+              <span className={budget.remaining < 0 ? 'font-medium text-rose-600 dark:text-rose-400' : 'text-slate-500 dark:text-slate-400'}>
                 {budget.remaining < 0 ? `${formatMoney(-budget.remaining)} over` : `${formatMoney(budget.remaining)} left`}
               </span>
             </div>
@@ -74,7 +74,7 @@ export function Dashboard({ month, setMonth, onEdit, navigate }: Props) {
                 )}
                 {budget.overCount > 0 && budget.warnCount > 0 && <span className="text-slate-400"> · </span>}
                 {budget.warnCount > 0 && (
-                  <span className="text-amber-600 dark:text-amber-400">{budget.warnCount} near the limit</span>
+                  <span className="text-amber-700 dark:text-amber-400">{budget.warnCount} near the limit</span>
                 )}
               </p>
             )}
@@ -84,7 +84,7 @@ export function Dashboard({ month, setMonth, onEdit, navigate }: Props) {
               ))}
             </div>
             {budget.unbudgetedSpent > 0 && (
-              <p className="mt-4 border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-slate-800">
+              <p className="mt-4 border-t border-slate-100 pt-3 text-xs text-slate-500 dark:text-slate-400 dark:border-slate-800">
                 Plus {formatMoney(budget.unbudgetedSpent)} spent in categories without a budget.
               </p>
             )}
@@ -118,7 +118,7 @@ export function Dashboard({ month, setMonth, onEdit, navigate }: Props) {
                   <li key={s.categoryId} className="flex items-center gap-2 text-sm">
                     <span className="h-2.5 w-2.5 rounded-full" style={{ background: s.color }} />
                     <span className="flex-1 truncate">{s.name}</span>
-                    <span className="tabular-nums text-slate-500">{Math.round(s.share * 100)}%</span>
+                    <span className="tabular-nums text-slate-500 dark:text-slate-400">{Math.round(s.share * 100)}%</span>
                   </li>
                 ))}
               </ul>

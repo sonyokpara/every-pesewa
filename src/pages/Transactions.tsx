@@ -119,7 +119,7 @@ export function Transactions({ onEdit }: { onEdit: (t: Transaction) => void }) {
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3 text-sm dark:border-slate-800">
           <p className="text-slate-600 dark:text-slate-300">
             <strong>{filtered.length}</strong> transaction{filtered.length === 1 ? '' : 's'} ·{' '}
-            <span className="text-emerald-600 dark:text-emerald-400">+{formatMoney(sum.income)}</span> ·{' '}
+            <span className="text-emerald-700 dark:text-emerald-400">+{formatMoney(sum.income)}</span> ·{' '}
             <span className="text-rose-600 dark:text-rose-400">−{formatMoney(sum.expense)}</span>
             {hasFilters && (
               <button className="ml-3 text-emerald-700 hover:underline dark:text-emerald-400" onClick={clear}>
@@ -135,7 +135,7 @@ export function Transactions({ onEdit }: { onEdit: (t: Transaction) => void }) {
           </select>
         </div>
         {all === undefined ? (
-          <p className="py-10 text-center text-sm text-slate-500">Loading…</p>
+          <p className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">Loading…</p>
         ) : (
           <TransactionList
             transactions={filtered}

@@ -66,9 +66,9 @@ export function TransactionForm({ open, editing, onClose }: Props) {
               className={`rounded-md py-1.5 text-sm font-medium capitalize transition ${
                 type === t
                   ? t === 'expense'
-                    ? 'bg-white text-rose-600 shadow dark:bg-slate-900'
-                    : 'bg-white text-emerald-600 shadow dark:bg-slate-900'
-                  : 'text-slate-500'
+                    ? 'bg-white text-rose-600 shadow dark:bg-slate-900 dark:text-rose-400'
+                    : 'bg-white text-emerald-700 shadow dark:bg-slate-900 dark:text-emerald-400'
+                  : 'text-slate-500 dark:text-slate-400'
               }`}
             >
               {t}

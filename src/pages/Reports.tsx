@@ -69,7 +69,7 @@ export function Reports() {
                 setPreset(p.id);
               }}
               className={`btn px-2.5 py-1.5 text-xs ${
-                preset === p.id ? 'bg-emerald-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300'
+                preset === p.id ? 'bg-emerald-700 text-white' : 'bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300'
               }`}
             >
               {p.label}
@@ -99,14 +99,14 @@ export function Reports() {
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="card">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Savings rate · {rangeLabel}</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Savings rate · {rangeLabel}</p>
           <p className="mt-1 text-2xl font-bold tabular-nums">{savingsRate === null ? '—' : `${Math.round(savingsRate * 100)}%`}</p>
-          <p className="text-xs text-slate-500">Share of income left after expenses</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Share of income left after expenses</p>
         </div>
         <div className="card">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Average monthly spending</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Average monthly spending</p>
           <p className="mt-1 text-2xl font-bold tabular-nums">{formatMoney(Math.round(avgSpend))}</p>
-          <p className="text-xs text-slate-500">Across active months in the 12-month trend below</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Across active months in the 12-month trend below</p>
         </div>
       </div>
 
@@ -131,7 +131,7 @@ export function Reports() {
                     {c.icon} {c.name}
                   </span>
                   <span className="tabular-nums">
-                    {formatMoney(c.total)} <span className="text-slate-500">· {Math.round(c.share * 100)}%</span>
+                    {formatMoney(c.total)} <span className="text-slate-500 dark:text-slate-400">· {Math.round(c.share * 100)}%</span>
                   </span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">

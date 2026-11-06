@@ -30,7 +30,7 @@ export class PageErrorBoundary extends Component<Props, State> {
     return (
       <div className="card mx-auto max-w-md p-6 text-center">
         <p className="font-semibold">This page couldn't be loaded.</p>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Check your connection, then reload. Your data is safe — it's stored in this browser.
         </p>
         <button className="btn-primary mt-4" onClick={() => window.location.reload()}>

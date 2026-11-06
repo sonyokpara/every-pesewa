@@ -99,12 +99,12 @@ export function Settings() {
                     </span>
                     <span className="h-2.5 w-2.5 rounded-full" style={{ background: c.color }} />
                     <span className="flex-1 text-sm font-medium">{c.name}</span>
-                    <span className="text-xs text-slate-500">{usage?.get(c.id!) ?? 0} txns</span>
-                    <button className="btn px-2 py-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => setEditing(c)} aria-label={`Edit ${c.name}`}>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">{usage?.get(c.id!) ?? 0} txns</span>
+                    <button className="btn px-2 py-1 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => setEditing(c)} aria-label={`Edit ${c.name}`}>
                       ✎
                     </button>
                     <button
-                      className="btn px-2 py-1 text-slate-500 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950"
+                      className="btn px-2 py-1 text-slate-500 dark:text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:text-rose-400 dark:hover:bg-rose-950"
                       onClick={() => setDeleting(c)}
                       aria-label={`Delete ${c.name}`}
                     >
@@ -119,7 +119,7 @@ export function Settings() {
 
       <section className="card space-y-4">
         <h2 className="font-semibold">Your data</h2>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           Everything is stored privately in this browser ({txCount} transaction{txCount === 1 ? '' : 's'}). Nothing is sent to a server. Make a backup now and then
           — clearing your browser data will erase it.
         </p>

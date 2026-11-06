@@ -37,10 +37,10 @@ export function Budgets({ month, setMonth }: { month: string; setMonth: (m: stri
 
       {budgets.length > 0 && (
         <section className="card">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Total budgeted for {monthLabel(month)}</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Total budgeted for {monthLabel(month)}</p>
           <div className="mt-1 flex flex-wrap items-baseline gap-x-3">
             <span className="text-2xl font-bold tabular-nums">{formatMoney(summary.spent)}</span>
-            <span className="text-slate-500">spent of {formatMoney(summary.limit)}</span>
+            <span className="text-slate-500 dark:text-slate-400">spent of {formatMoney(summary.limit)}</span>
           </div>
           <div className="mt-3">
             <BudgetTotalBar spent={summary.spent} limit={summary.limit} status={summary.status} label="Total budget used" />
@@ -52,7 +52,7 @@ export function Budgets({ month, setMonth }: { month: string; setMonth: (m: stri
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div>
             <h2 className="font-semibold">Monthly limits by category</h2>
-            <p className="text-sm text-slate-500">Leave a limit empty for no budget. Bars turn amber at 80% and red when you go over.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Leave a limit empty for no budget. Bars turn amber at 80% and red when you go over.</p>
           </div>
           {prevBudgets.length > 0 && (
             <button className="btn-secondary" onClick={copyPrev}>
@@ -73,7 +73,7 @@ export function Budgets({ month, setMonth }: { month: string; setMonth: (m: stri
                     <span className="font-medium">
                       {c.icon} {c.name}
                     </span>
-                    <span className="ml-2 text-slate-500">{formatMoney(spentBy.get(c.id!) ?? 0)} spent · no budget</span>
+                    <span className="ml-2 text-slate-500 dark:text-slate-400">{formatMoney(spentBy.get(c.id!) ?? 0)} spent · no budget</span>
                   </div>
                 )}
                 <LimitInput key={`${c.id}-${month}`} category={c} month={month} limit={p?.budget.limit} />

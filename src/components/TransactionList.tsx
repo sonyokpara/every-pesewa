@@ -15,7 +15,7 @@ export function TransactionList({ transactions, categoryMap, onEdit, emptyMessag
   const [deleting, setDeleting] = useState<Transaction | null>(null);
 
   if (!transactions.length) {
-    return <p className="py-10 text-center text-sm text-slate-500">{emptyMessage}</p>;
+    return <p className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">{emptyMessage}</p>;
   }
 
   return (
@@ -34,13 +34,13 @@ export function TransactionList({ transactions, categoryMap, onEdit, emptyMessag
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{t.note || c?.name || 'Unknown'}</p>
-                <p className="truncate text-xs text-slate-500">
+                <p className="truncate text-xs text-slate-500 dark:text-slate-400">
                   {c?.name ?? 'Unknown'} · {formatDate(t.date)}
                 </p>
               </div>
               <span
                 className={`shrink-0 text-sm font-semibold tabular-nums ${
-                  t.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                  t.type === 'income' ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                 }`}
               >
                 {t.type === 'income' ? '+' : '−'}
@@ -48,7 +48,7 @@ export function TransactionList({ transactions, categoryMap, onEdit, emptyMessag
               </span>
               <div className="flex shrink-0 gap-1 sm:opacity-0 sm:transition sm:group-hover:opacity-100 sm:focus-within:opacity-100">
                 <button
-                  className="btn px-2 py-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="btn px-2 py-1 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                   onClick={() => onEdit(t)}
                   aria-label="Edit transaction"
                   title="Edit"
@@ -56,7 +56,7 @@ export function TransactionList({ transactions, categoryMap, onEdit, emptyMessag
                   ✎
                 </button>
                 <button
-                  className="btn px-2 py-1 text-slate-500 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950"
+                  className="btn px-2 py-1 text-slate-500 dark:text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:text-rose-400 dark:hover:bg-rose-950"
                   onClick={() => setDeleting(t)}
                   aria-label="Delete transaction"
                   title="Delete"

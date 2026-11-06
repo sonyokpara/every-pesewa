@@ -14,7 +14,7 @@ const tooltipStyle = {
 };
 
 export function CategoryDonut({ data, height = 240, showLegend = true }: { data: CategoryTotal[]; height?: number; showLegend?: boolean }) {
-  if (!data.length) return <p className="py-10 text-center text-sm text-slate-500">No spending in this period.</p>;
+  if (!data.length) return <p className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">No spending in this period.</p>;
   const total = data.reduce((s, d) => s + d.total, 0);
   return (
     <div className={showLegend ? 'grid items-center gap-4 sm:grid-cols-2' : ''}>
@@ -30,7 +30,7 @@ export function CategoryDonut({ data, height = 240, showLegend = true }: { data:
           </PieChart>
         </ResponsiveContainer>
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-xs text-slate-500">Total spent</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">Total spent</span>
           <span className="text-lg font-bold tabular-nums">{formatMoneyCompact(total)}</span>
         </div>
       </div>
@@ -42,7 +42,7 @@ export function CategoryDonut({ data, height = 240, showLegend = true }: { data:
               <span className="flex-1 truncate">
                 {d.icon} {d.name}
               </span>
-              <span className="tabular-nums text-slate-500">{Math.round(d.share * 100)}%</span>
+              <span className="tabular-nums text-slate-500 dark:text-slate-400">{Math.round(d.share * 100)}%</span>
               <span className="w-28 text-right font-medium tabular-nums">{formatMoney(d.total)}</span>
             </li>
           ))}

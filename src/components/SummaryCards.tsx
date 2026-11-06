@@ -16,7 +16,7 @@ export function SummaryCards({ totals, label }: { totals: Totals; label: string 
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       {items.map((i) => (
         <div key={i.name} className="card">
-          <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
+          <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
             <span aria-hidden>{i.icon}</span> {i.name} <span className="normal-case tracking-normal">· {label}</span>
           </p>
           <p className={`mt-1 text-2xl font-bold tabular-nums ${i.cls}`}>{formatMoney(i.value)}</p>

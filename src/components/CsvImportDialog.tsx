@@ -91,7 +91,7 @@ export function CsvImportDialog({ open, onClose }: { open: boolean; onClose: () 
                 📄
               </span>
               <span className="font-medium">{fileName || 'Choose a CSV file'}</span>
-              <span className="text-xs text-slate-500">Exported from this app, a spreadsheet, or your bank / MoMo statement</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Exported from this app, a spreadsheet, or your bank / MoMo statement</span>
               <input type="file" accept=".csv,text/csv" className="sr-only" onChange={onFile} />
             </label>
             {loadError && <p className="mt-2 text-sm text-rose-600">{loadError}</p>}
@@ -120,7 +120,7 @@ export function CsvImportDialog({ open, onClose }: { open: boolean; onClose: () 
                           </option>
                         ))}
                       </select>
-                      {f.hint && <p className="mt-1 text-xs text-slate-500">{f.hint}</p>}
+                      {f.hint && <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{f.hint}</p>}
                     </div>
                   ))}
                 </div>
@@ -130,14 +130,14 @@ export function CsvImportDialog({ open, onClose }: { open: boolean; onClose: () 
                 <div>
                   <h3 className="mb-2 text-sm font-semibold">
                     Preview{' '}
-                    <span className="font-normal text-slate-500">
+                    <span className="font-normal text-slate-500 dark:text-slate-400">
                       · {result.valid.length} ready, {result.errors.length} with problems
                     </span>
                   </h3>
                   {result.valid.length > 0 && (
                     <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
                       <table className="w-full text-left text-sm">
-                        <thead className="bg-slate-50 text-xs text-slate-500 dark:bg-slate-800/60">
+                        <thead className="bg-slate-50 text-xs text-slate-500 dark:text-slate-400 dark:bg-slate-800/60">
                           <tr>
                             <th className="px-3 py-2">Date</th>
                             <th className="px-3 py-2">Type</th>
@@ -150,16 +150,16 @@ export function CsvImportDialog({ open, onClose }: { open: boolean; onClose: () 
                           {result.valid.slice(0, 5).map((r, i) => (
                             <tr key={i}>
                               <td className="whitespace-nowrap px-3 py-1.5">{formatDate(r.date)}</td>
-                              <td className={`px-3 py-1.5 capitalize ${r.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>{r.type}</td>
+                              <td className={`px-3 py-1.5 capitalize ${r.type === 'income' ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>{r.type}</td>
                               <td className="px-3 py-1.5">{r.categoryName}</td>
                               <td className="whitespace-nowrap px-3 py-1.5 text-right tabular-nums">{formatMoney(r.amount)}</td>
-                              <td className="max-w-48 truncate px-3 py-1.5 text-slate-500">{r.note}</td>
+                              <td className="max-w-48 truncate px-3 py-1.5 text-slate-500 dark:text-slate-400">{r.note}</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                       {result.valid.length > 5 && (
-                        <p className="border-t border-slate-100 px-3 py-1.5 text-xs text-slate-500 dark:border-slate-800">
+                        <p className="border-t border-slate-100 px-3 py-1.5 text-xs text-slate-500 dark:text-slate-400 dark:border-slate-800">
                           …and {result.valid.length - 5} more
                         </p>
                       )}
