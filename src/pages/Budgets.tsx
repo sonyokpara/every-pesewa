@@ -120,20 +120,29 @@ function LimitInput({ category, month, limit }: { category: Category; month: str
     if (p !== limit) await setBudget(category.id!, month, p);
   }
 
+  const errorId = `limit-error-${category.id}`;
   return (
-    <div className="relative">
-      <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-faint">GH₵</span>
-      <input
-        className={`input pl-12 text-right font-semibold tabular-nums placeholder:font-normal ${error ? 'border-loss' : ''}`}
-        aria-invalid={error}
-        inputMode="decimal"
-        placeholder="No limit"
-        aria-label={`Monthly budget for ${category.name}`}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onBlur={commit}
-        onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-      />
+    <div>
+      <div className="relative">
+        <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-faint">GH₵</span>
+        <input
+          aria-describedby={error ? errorId : undefined}
+          className={`input pl-12 text-right font-semibold tabular-nums placeholder:font-normal ${error ? 'border-loss' : ''}`}
+          aria-invalid={error}
+          inputMode="decimal"
+          placeholder="No limit"
+          aria-label={`Monthly budget for ${category.name}`}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+        />
+      </div>
+      {error && (
+        <p id={errorId} className="mt-1 text-right text-xs font-medium text-loss">
+          Enter a number, like 250
+        </p>
+      )}
     </div>
   );
 }

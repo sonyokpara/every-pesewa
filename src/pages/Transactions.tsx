@@ -64,8 +64,9 @@ export function Transactions({ onEdit }: { onEdit: (t: Transaction) => void }) {
         </button>
       </PageHeader>
 
-      <div className="grid gap-3 rounded-2xl border border-line bg-surface p-4 sm:grid-cols-2 lg:grid-cols-6">
-        <div className="sm:col-span-2">
+      {/* Two columns even on phones, so the filters don't push the list below the fold. */}
+      <div className="grid grid-cols-2 gap-3 rounded-2xl border border-line bg-surface p-4 lg:grid-cols-6">
+        <div className="col-span-2">
           <label className="label" htmlFor="f-search">
             Search
           </label>
@@ -133,11 +134,14 @@ export function Transactions({ onEdit }: { onEdit: (t: Transaction) => void }) {
             <p className="font-semibold">
               {filtered.length} transaction{filtered.length === 1 ? '' : 's'}
             </p>
-            <p className="text-muted tabular-nums">
-              In <span className="font-semibold text-gain">{formatMoney(sum.income)}</span>
-            </p>
-            <p className="text-muted tabular-nums">
-              Out <span className="font-semibold text-ink">{formatMoney(sum.expense)}</span>
+            {/* In and out wrap together, never one without the other. */}
+            <p className="flex gap-x-4 text-muted tabular-nums">
+              <span>
+                In <span className="font-semibold text-gain">{formatMoney(sum.income)}</span>
+              </span>
+              <span>
+                Out <span className="font-semibold text-ink">{formatMoney(sum.expense)}</span>
+              </span>
             </p>
             {hasFilters && (
               <button className="link" onClick={clear}>

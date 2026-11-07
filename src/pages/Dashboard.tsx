@@ -144,11 +144,6 @@ function DashboardContent({
             categoryMap={catMap}
             onEdit={onEdit}
             emptyMessage={`Nothing recorded for ${monthLabel(month)} yet.`}
-            emptyAction={
-              <button className="btn-primary" onClick={onAdd}>
-                Add a transaction
-              </button>
-            }
           />
         </section>
 

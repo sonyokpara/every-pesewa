@@ -13,6 +13,7 @@
   --paper: #f1f4f0;
   --surface: #ffffff;
   --sunken: #e8ede8;
+  --raised: #ffffff;
   --ink: #142019;
   --muted: #56675e;
   --faint: #8a9a91;
@@ -37,6 +38,7 @@
   --paper: #0b1411;
   --surface: #111d18;
   --sunken: #0e1915;
+  --raised: #2a3d34;
   --ink: #e4ece7;
   --muted: #98aaa0;
   --faint: #6c7f75;
@@ -63,6 +65,7 @@
   --color-paper: var(--paper);
   --color-surface: var(--surface);
   --color-sunken: var(--sunken);
+  --color-raised: var(--raised);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-faint: var(--faint);

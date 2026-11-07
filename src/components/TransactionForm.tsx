@@ -74,7 +74,7 @@ export function TransactionForm({ open, editing, onClose }: Props) {
               onClick={() => setType(t)}
               className={`cursor-pointer rounded-[9px] py-2 text-sm font-semibold transition-colors ${
                 type === t
-                  ? `bg-surface shadow-[0_1px_2px_rgb(6_18_13/0.12)] ${t === 'income' ? 'text-gain' : 'text-ink'}`
+                  ? `bg-raised shadow-[0_1px_2px_rgb(6_18_13/0.12)] ${t === 'income' ? 'text-gain' : 'text-ink'}`
                   : 'text-muted hover:text-ink'
               }`}
             >

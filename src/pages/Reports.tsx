@@ -135,7 +135,11 @@ export function Reports() {
 
       <section className="card" aria-labelledby="r-trend">
         <PanelHeader id="r-trend" title="Money in and out, last 12 months" />
-        <MonthlyBars data={trend} />
+        {activeMonths.length ? (
+          <MonthlyBars data={trend} />
+        ) : (
+          <p className="rounded-xl bg-sunken py-10 text-center text-sm text-muted">Nothing recorded in these 12 months.</p>
+        )}
       </section>
 
       {income.length > 0 && (
