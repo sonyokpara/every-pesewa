@@ -1,6 +1,12 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { IconClose } from './Icons';
 
+/**
+ * Fired on `document` when a modal closes but the element that opened it no longer exists
+ * (e.g. the transaction it edited was deleted), so its owner can move focus somewhere sensible.
+ */
+export const FOCUS_LOST_EVENT = 'modal-focus-lost';
+
 interface Props {
   title: string;
   open: boolean;
@@ -28,6 +34,7 @@ export function Modal({ title, open, onClose, children, wide }: Props) {
       if (dialog.open) dialog.close();
       // Put focus back on whatever opened the dialog (if it still exists).
       if (previous?.isConnected) previous.focus();
+      else document.dispatchEvent(new Event(FOCUS_LOST_EVENT));
     };
   }, [open]);
 

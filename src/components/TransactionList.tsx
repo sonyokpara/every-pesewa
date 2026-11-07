@@ -1,9 +1,9 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { db } from '../db/db';
 import { formatDate, formatMoney } from '../lib/format';
 import type { Category, Transaction } from '../types';
 import { IconPencil, IconTrash } from './Icons';
-import { ConfirmDialog } from './Modal';
+import { ConfirmDialog, FOCUS_LOST_EVENT } from './Modal';
 
 interface Props {
   transactions: Transaction[];
@@ -16,10 +16,35 @@ interface Props {
 
 export function TransactionList({ transactions, categoryMap, onEdit, emptyMessage = 'No transactions yet.', emptyAction }: Props) {
   const [deleting, setDeleting] = useState<Transaction | null>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const emptyRef = useRef<HTMLDivElement>(null);
+  // The row that last had focus in this list, by id and position.
+  const lastFocus = useRef<{ id: number; index: number } | null>(null);
+
+  // Deleting the focused row (from its Delete button or the edit form) removes the element that
+  // had focus, and the browser drops focus to <body>. Move it to the row that took its place (or
+  // the one above, or the empty message) so keyboard and screen-reader users keep their place.
+  // This runs both when the list re-renders without the row and when a dialog closes and can't
+  // return focus to its opener; whichever happens last finds focus on <body>.
+  useEffect(() => {
+    function restore() {
+      const last = lastFocus.current;
+      if (!last || transactions.some((t) => t.id === last.id)) return;
+      const active = document.activeElement;
+      if (active && active !== document.body) return;
+      lastFocus.current = null;
+      const rows = listRef.current?.querySelectorAll<HTMLElement>(':scope > li > button:first-child');
+      const target = rows?.length ? rows[Math.min(last.index, rows.length - 1)] : emptyRef.current;
+      target?.focus();
+    }
+    restore();
+    document.addEventListener(FOCUS_LOST_EVENT, restore);
+    return () => document.removeEventListener(FOCUS_LOST_EVENT, restore);
+  }, [transactions]);
 
   if (!transactions.length) {
     return (
-      <div className="rounded-xl bg-sunken px-4 py-10 text-center">
+      <div ref={emptyRef} tabIndex={-1} className="rounded-xl bg-sunken px-4 py-10 text-center">
         <p className="text-sm text-muted">{emptyMessage}</p>
         {emptyAction && <div className="mt-4">{emptyAction}</div>}
       </div>
@@ -28,7 +53,21 @@ export function TransactionList({ transactions, categoryMap, onEdit, emptyMessag
 
   return (
     <>
-      <ul className="-mx-2 divide-y divide-line">
+      <ul
+        ref={listRef}
+        className="-mx-2 divide-y divide-line"
+        onFocus={(e) => {
+          const li = (e.target as HTMLElement).closest('li');
+          const index = li ? Array.prototype.indexOf.call(e.currentTarget.children, li) : -1;
+          if (index >= 0 && transactions[index]?.id !== undefined) lastFocus.current = { id: transactions[index].id!, index };
+        }}
+        onBlur={(e) => {
+          // Forget the row once focus genuinely moves elsewhere. Moving into a dialog the row
+          // opened doesn't count, and a removed element's blur has no relatedTarget.
+          const next = e.relatedTarget as HTMLElement | null;
+          if (next && !e.currentTarget.contains(next) && !next.closest('dialog')) lastFocus.current = null;
+        }}
+      >
         {transactions.map((t) => {
           const c = categoryMap.get(t.categoryId);
           const income = t.type === 'income';
