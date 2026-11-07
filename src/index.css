@@ -1,39 +1,138 @@
+@import "@fontsource-variable/bricolage-grotesque/opsz.css";
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Design tokens. Colours come from the cedi banknote: a deep "cedi green", a sparing gold,
+ * and a kola red for money going out, on a cool sage paper. Components use the semantic
+ * names (bg-surface, text-muted, border-line, text-loss…) so light and dark stay in step
+ * from this one place instead of dark: variants scattered through the markup.
+ */
 :root {
+  --paper: #f1f4f0;
+  --surface: #ffffff;
+  --sunken: #e8ede8;
+  --ink: #142019;
+  --muted: #56675e;
+  --faint: #8a9a91;
+  --line: #dbe3dc;
+  --brand: #0b5d44;
+  --brand-hover: #084a36;
+  --on-brand: #ffffff;
+  --brand-text: #0b6247;
+  --brand-soft: #e1eee7;
+  --gold: #c8932a;
+  --gain: #0b7a55;
+  --loss: #b23a2e;
+  --loss-soft: #f8e7e4;
+  --warn: #9a6205;
+  --warn-soft: #f8eed9;
+  --note: #0a4a37;
+  --note-ink: #f3f1e6;
   --tooltip-bg: #ffffff;
   color-scheme: light;
 }
 :root.dark {
-  --tooltip-bg: #0f172a;
+  --paper: #0b1411;
+  --surface: #111d18;
+  --sunken: #0e1915;
+  --ink: #e4ece7;
+  --muted: #98aaa0;
+  --faint: #6c7f75;
+  --line: #22332b;
+  --brand: #46c495;
+  --brand-hover: #63d3a9;
+  --on-brand: #04241a;
+  --brand-text: #5fd0a5;
+  --brand-soft: #143328;
+  --gold: #e0b558;
+  --gain: #5fd0a5;
+  --loss: #f08a7a;
+  --loss-soft: #3a1c18;
+  --warn: #e7b04b;
+  --warn-soft: #33270f;
+  --note: #0d3a2c;
+  --note-ink: #f3f1e6;
+  --tooltip-bg: #111d18;
   color-scheme: dark;
 }
 
+@theme inline {
+  --font-sans: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-on-brand: var(--on-brand);
+  --color-brand-text: var(--brand-text);
+  --color-brand-soft: var(--brand-soft);
+  --color-gold: var(--gold);
+  --color-gain: var(--gain);
+  --color-loss: var(--loss);
+  --color-loss-soft: var(--loss-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-note: var(--note);
+  --color-note-ink: var(--note-ink);
+}
+
 body {
-  @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  @apply bg-paper font-sans text-ink antialiased;
+  font-optical-sizing: auto;
+}
+
+/* Money and counts line up in columns everywhere. */
+.tabular-nums,
+input[inputmode="decimal"] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dialogs rise into place, showing where they came from (the Add button / the bottom sheet edge). */
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* In the base layer so a component's own focus style (a utility) can override it. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
 }
 
 @utility card {
-  @apply rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900;
+  @apply rounded-2xl border border-line bg-surface p-5;
 }
 @utility input {
-  @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-800;
+  @apply w-full rounded-[10px] border border-line bg-surface px-3 py-2 text-sm text-ink outline-none placeholder:text-faint focus:border-brand focus:ring-2 focus:ring-brand/25;
 }
 @utility btn {
-  @apply inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  @apply inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-[10px] px-3.5 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-45;
 }
 @utility btn-primary {
-  @apply btn bg-emerald-700 text-white hover:bg-emerald-800;
+  @apply btn bg-brand text-on-brand hover:bg-brand-hover;
 }
 @utility btn-secondary {
-  @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700;
+  @apply btn border border-line bg-surface text-ink hover:bg-sunken;
 }
 @utility btn-danger {
-  @apply btn bg-rose-600 text-white hover:bg-rose-700;
+  @apply btn bg-loss text-white hover:opacity-90 dark:text-[#2a0d09];
+}
+@utility btn-ghost {
+  @apply btn px-2 text-muted hover:bg-sunken hover:text-ink;
 }
 @utility label {
-  @apply mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400;
+  @apply mb-1.5 block text-[13px] font-medium text-muted;
+}
+@utility link {
+  @apply cursor-pointer font-medium text-brand-text underline-offset-4 hover:underline;
 }

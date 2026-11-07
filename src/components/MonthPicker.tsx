@@ -1,27 +1,30 @@
 import { currentMonth, monthLabel, shiftMonth } from '../lib/format';
+import { IconChevronLeft, IconChevronRight } from './Icons';
 
-/** Arrow buttons are 40px on phones (comfortable tap targets) and compact from sm up. */
-const ARROW = 'btn-secondary h-10 w-10 px-0 sm:h-auto sm:w-auto sm:px-2.5';
+/** Arrows are 40px square: comfortable tap targets on phones without crowding the desktop header. */
+const ARROW = 'flex h-10 w-10 cursor-pointer items-center justify-center text-muted transition-colors hover:bg-sunken hover:text-ink';
 
 export function MonthPicker({ month, onChange }: { month: string; onChange: (m: string) => void }) {
   const isCurrent = month === currentMonth();
   return (
-    <div className="flex items-center gap-1">
-      <button className={ARROW} onClick={() => onChange(shiftMonth(month, -1))} aria-label="Previous month">
-        ‹
-      </button>
-      {/* Announce the new month when the arrows change it. */}
-      <span className="min-w-36 text-center text-sm font-semibold" aria-live="polite">
-        {monthLabel(month)}
-      </span>
-      <button className={ARROW} onClick={() => onChange(shiftMonth(month, 1))} aria-label="Next month">
-        ›
-      </button>
+    <div className="flex items-center gap-3">
       {!isCurrent && (
-        <button className="btn px-2 text-xs text-emerald-700 hover:underline dark:text-emerald-400" onClick={() => onChange(currentMonth())}>
+        <button className="link text-sm" onClick={() => onChange(currentMonth())}>
           This month
         </button>
       )}
+      <div className="flex items-center overflow-hidden rounded-[10px] border border-line bg-surface">
+        <button className={ARROW} onClick={() => onChange(shiftMonth(month, -1))} aria-label="Previous month">
+          <IconChevronLeft size={18} />
+        </button>
+        {/* Announce the new month when the arrows change it. */}
+        <span className="min-w-36 border-x border-line px-3 text-center text-sm leading-10 font-semibold" aria-live="polite">
+          {monthLabel(month)}
+        </span>
+        <button className={ARROW} onClick={() => onChange(shiftMonth(month, 1))} aria-label="Next month">
+          <IconChevronRight size={18} />
+        </button>
+      </div>
     </div>
   );
 }

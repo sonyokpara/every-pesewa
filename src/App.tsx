@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
+import { CoinMark, IconChart, IconHome, IconList, IconMoon, IconPlus, IconSettings, IconSun, IconTarget } from './components/Icons';
 import { PageErrorBoundary } from './components/PageErrorBoundary';
 import { PageSkeleton } from './components/Skeleton';
 import { TransactionForm } from './components/TransactionForm';
@@ -15,12 +16,12 @@ const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m
 
 export type PageId = 'dashboard' | 'transactions' | 'budgets' | 'reports' | 'settings';
 
-const NAV: { id: PageId; label: string; icon: string }[] = [
-  { id: 'dashboard', label: 'Overview', icon: '🏠' },
-  { id: 'transactions', label: 'Transactions', icon: '🧾' },
-  { id: 'budgets', label: 'Budgets', icon: '🎯' },
-  { id: 'reports', label: 'Reports', icon: '📊' },
-  { id: 'settings', label: 'Settings', icon: '⚙️' },
+const NAV: { id: PageId; label: string; Icon: typeof IconHome }[] = [
+  { id: 'dashboard', label: 'Overview', Icon: IconHome },
+  { id: 'transactions', label: 'Transactions', Icon: IconList },
+  { id: 'budgets', label: 'Budgets', Icon: IconTarget },
+  { id: 'reports', label: 'Reports', Icon: IconChart },
+  { id: 'settings', label: 'Settings', Icon: IconSettings },
 ];
 
 const pageFromHash = (): PageId => {
@@ -93,24 +94,22 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen pb-20 md:pb-0">
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/85 backdrop-blur dark:border-slate-800 dark:bg-slate-950/85">
-        <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-          <a href="#dashboard" className="flex items-center gap-2 font-bold">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-700 text-lg text-white">₵</span>
-            <span className="hidden sm:inline">Every Pesewa</span>
+    <div className="min-h-screen pb-24 md:pb-0">
+      <header className="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4">
+          <a href="#dashboard" className="flex shrink-0 items-center gap-2.5 rounded-full">
+            <CoinMark size={30} />
+            <span className="text-[17px] font-bold tracking-tight">Every Pesewa</span>
           </a>
           {/* Only one of the two navs is displayed at a time, so both can carry the same label. */}
-          <nav className="hidden flex-1 gap-1 md:flex" aria-label="Main">
+          <nav className="hidden h-full flex-1 items-stretch gap-1 md:flex" aria-label="Main">
             {NAV.map((n) => (
               <a
                 key={n.id}
                 href={`#${n.id}`}
                 aria-current={page === n.id ? 'page' : undefined}
-                className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                  page === n.id
-                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                className={`relative flex items-center px-3 text-sm font-medium transition-colors after:absolute after:inset-x-3 after:-bottom-px after:h-0.5 after:rounded-full ${
+                  page === n.id ? 'text-ink after:bg-brand' : 'text-muted hover:text-ink'
                 }`}
               >
                 {n.label}
@@ -119,18 +118,19 @@ export default function App() {
           </nav>
           <div className="ml-auto flex items-center gap-2">
             <button
-              className="btn-secondary px-2.5"
+              className="btn-ghost h-10 w-10 px-0"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-              title="Toggle theme"
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             >
-              {theme === 'dark' ? '☀️' : '🌙'}
+              {theme === 'dark' ? <IconSun /> : <IconMoon />}
             </button>
-            <button className="btn-primary" onClick={openAdd} title="Add transaction (N)" aria-keyshortcuts="n">
-              + Add
+            <button className="btn-primary h-10 pr-3 pl-3" onClick={openAdd} title="Add transaction (N)" aria-keyshortcuts="n">
+              <IconPlus size={18} />
+              Add
               <kbd
                 aria-hidden
-                className="ml-1 hidden rounded border border-white/40 px-1 font-sans text-[11px] leading-4 text-white/90 md:inline-block"
+                className="ml-1 hidden rounded-md bg-white/15 px-1.5 font-sans text-[11px] leading-5 md:inline-block dark:bg-black/15"
               >
                 N
               </kbd>
@@ -139,7 +139,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 pt-7 pb-10">
         {/* Keyed by page so moving to another page clears a previous error. */}
         <PageErrorBoundary key={page}>
           <Suspense fallback={<PageSkeleton />}>
@@ -154,20 +154,21 @@ export default function App() {
 
       {/* Mobile bottom nav */}
       {/* Bottom padding keeps the links clear of the iPhone home indicator (needs viewport-fit=cover). */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t pb-[env(safe-area-inset-bottom)] border-slate-200 bg-white/95 backdrop-blur md:hidden dark:border-slate-800 dark:bg-slate-950/95" aria-label="Main">
-        {NAV.map((n) => (
+      <nav
+        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+        aria-label="Main"
+      >
+        {NAV.map(({ id, label, Icon }) => (
           <a
-            key={n.id}
-            href={`#${n.id}`}
-            aria-current={page === n.id ? 'page' : undefined}
-            className={`flex flex-col items-center gap-0.5 py-2 text-[11px] ${
-              page === n.id ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
-            }`}
+            key={id}
+            href={`#${id}`}
+            aria-current={page === id ? 'page' : undefined}
+            className={`flex flex-col items-center gap-1 pt-2 pb-2.5 text-[11px] font-medium ${page === id ? 'text-brand-text' : 'text-muted'}`}
           >
-            <span className="text-lg" aria-hidden>
-              {n.icon}
+            <span className={`flex h-7 w-12 items-center justify-center rounded-full ${page === id ? 'bg-brand-soft' : ''}`}>
+              <Icon size={20} />
             </span>
-            {n.label}
+            {label}
           </a>
         ))}
       </nav>

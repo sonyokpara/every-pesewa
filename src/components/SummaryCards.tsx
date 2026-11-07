@@ -1,29 +1,25 @@
 import { formatMoney } from '../lib/format';
 import type { Totals } from '../lib/stats';
 
-/** `label` names the period when nothing else on the page does (Reports); Dashboard's month picker already shows it. */
-export function SummaryCards({ totals, label }: { totals: Totals; label?: string }) {
+/**
+ * Money in, money out and what's left, as one strip divided into columns (one panel, not three
+ * look-alike cards, because the three figures are one sum: in − out = balance).
+ */
+export function SummaryCards({ totals }: { totals: Totals }) {
   const items = [
-    { name: 'Income', value: totals.income, cls: 'text-emerald-600 dark:text-emerald-400', icon: '↓' },
-    { name: 'Expenses', value: totals.expense, cls: 'text-rose-600 dark:text-rose-400', icon: '↑' },
-    {
-      name: 'Balance',
-      value: totals.balance,
-      cls: totals.balance < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white',
-      icon: '=',
-    },
+    { name: 'Money in', value: totals.income, cls: 'text-gain' },
+    { name: 'Money out', value: totals.expense, cls: '' },
+    { name: 'Balance', value: totals.balance, cls: totals.balance < 0 ? 'text-loss' : '' },
   ];
   return (
-    // Three columns only from md: at sm widths a large amount (GH₵1,234,567.89) overflowed its card.
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+    // Three columns only from md: at sm widths a large amount (GH₵1,234,567.89) overflowed its column.
+    <dl className="grid grid-cols-1 divide-y divide-line rounded-2xl border border-line bg-surface md:grid-cols-3 md:divide-x md:divide-y-0">
       {items.map((i) => (
-        <div key={i.name} className="card min-w-0">
-          <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            <span aria-hidden>{i.icon}</span> {i.name} {label && <span className="normal-case tracking-normal">· {label}</span>}
-          </p>
-          <p className={`mt-1 text-xl font-bold tabular-nums break-words lg:text-2xl ${i.cls}`}>{formatMoney(i.value)}</p>
+        <div key={i.name} className="min-w-0 px-5 py-4">
+          <dt className="text-[13px] font-medium text-muted">{i.name}</dt>
+          <dd className={`mt-1 text-2xl font-bold tracking-tight break-words tabular-nums ${i.cls}`}>{formatMoney(i.value)}</dd>
         </div>
       ))}
-    </div>
+    </dl>
   );
 }

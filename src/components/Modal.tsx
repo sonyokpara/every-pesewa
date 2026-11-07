@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { IconClose } from './Icons';
 
 interface Props {
   title: string;
@@ -39,21 +40,23 @@ export function Modal({ title, open, onClose, children, wide }: Props) {
         e.preventDefault();
         onClose();
       }}
-      className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none overflow-hidden bg-transparent p-0 text-slate-900 backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm dark:text-slate-100"
+      className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none overflow-hidden bg-transparent p-0 text-ink backdrop:bg-[#06120d]/55 backdrop:backdrop-blur-[2px]"
     >
       <div
         className="flex h-full items-end justify-center sm:items-center sm:p-4"
         onMouseDown={(e) => e.target === e.currentTarget && onClose()}
       >
         <div
-          className={`max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-white p-5 shadow-xl sm:rounded-2xl dark:bg-slate-900 ${wide ? 'sm:max-w-3xl' : 'sm:max-w-md'}`}
+          className={`max-h-[92vh] w-full overflow-y-auto rounded-t-3xl border border-line bg-surface px-5 pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_24px_60px_-20px_rgb(6_18_13/0.45)] motion-safe:animate-[sheet-in_180ms_ease-out] sm:rounded-2xl sm:p-6 ${wide ? 'sm:max-w-3xl' : 'sm:max-w-md'}`}
         >
-          <div className="mb-4 flex items-center justify-between">
-            <h2 id={titleId} className="text-lg font-semibold">
+          {/* Grab handle hints that the sheet came up from the bottom on phones. */}
+          <div className="mx-auto -mt-1 mb-4 h-1 w-10 rounded-full bg-line sm:hidden" aria-hidden />
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <h2 id={titleId} className="text-xl font-bold tracking-tight">
               {title}
             </h2>
-            <button className="btn px-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" onClick={onClose} aria-label="Close">
-              ✕
+            <button className="btn-ghost -mr-2 h-9 w-9 px-0" onClick={onClose} aria-label="Close">
+              <IconClose size={18} />
             </button>
           </div>
           {children}
@@ -75,7 +78,7 @@ interface ConfirmProps {
 export function ConfirmDialog({ open, title, message, confirmLabel = 'Delete', onConfirm, onCancel }: ConfirmProps) {
   return (
     <Modal title={title} open={open} onClose={onCancel}>
-      <div className="mb-5 text-sm text-slate-600 dark:text-slate-300">{message}</div>
+      <div className="mb-6 text-sm leading-relaxed text-muted">{message}</div>
       <div className="flex justify-end gap-2">
         <button className="btn-secondary" onClick={onCancel}>
           Cancel

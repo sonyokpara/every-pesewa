@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import { IconDownload, IconSearch } from '../components/Icons';
+import { PageHeader } from '../components/PageHeader';
 import { TransactionList } from '../components/TransactionList';
 import { exportTransactionsCsv } from '../lib/csv';
 import { formatMoney, todayISO } from '../lib/format';
@@ -50,24 +52,34 @@ export function Transactions({ onEdit }: { onEdit: (t: Transaction) => void }) {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Transactions</h1>
+    <div className="space-y-6">
+      <PageHeader title="Transactions">
         <button
           className="btn-secondary"
           disabled={!filtered.length}
           onClick={() => downloadFile(`transactions-${todayISO()}.csv`, exportTransactionsCsv(filtered, categories), 'text/csv')}
         >
-          ⬇ Export {hasFilters ? 'filtered' : 'all'} to CSV
+          <IconDownload size={17} />
+          Export {hasFilters ? 'filtered' : 'all'} to CSV
         </button>
-      </div>
+      </PageHeader>
 
-      <div className="card grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="grid gap-3 rounded-2xl border border-line bg-surface p-4 sm:grid-cols-2 lg:grid-cols-6">
         <div className="sm:col-span-2">
           <label className="label" htmlFor="f-search">
             Search
           </label>
-          <input id="f-search" className="input" placeholder="Note or category…" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <div className="relative">
+            <IconSearch size={17} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint" />
+            <input
+              id="f-search"
+              type="search"
+              className="input pl-9"
+              placeholder="Note or category"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
         <div>
           <label className="label" htmlFor="f-type">
@@ -115,18 +127,24 @@ export function Transactions({ onEdit }: { onEdit: (t: Transaction) => void }) {
         </div>
       </div>
 
-      <section className="card">
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3 text-sm dark:border-slate-800">
-          <p className="text-slate-600 dark:text-slate-300">
-            <strong>{filtered.length}</strong> transaction{filtered.length === 1 ? '' : 's'} ·{' '}
-            <span className="text-emerald-700 dark:text-emerald-400">+{formatMoney(sum.income)}</span> ·{' '}
-            <span className="text-rose-600 dark:text-rose-400">−{formatMoney(sum.expense)}</span>
+      <section className="card" aria-label="Results">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-line pb-4 text-sm">
+          <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+            <p className="font-semibold">
+              {filtered.length} transaction{filtered.length === 1 ? '' : 's'}
+            </p>
+            <p className="text-muted tabular-nums">
+              In <span className="font-semibold text-gain">{formatMoney(sum.income)}</span>
+            </p>
+            <p className="text-muted tabular-nums">
+              Out <span className="font-semibold text-ink">{formatMoney(sum.expense)}</span>
+            </p>
             {hasFilters && (
-              <button className="ml-3 text-emerald-700 hover:underline dark:text-emerald-400" onClick={clear}>
+              <button className="link" onClick={clear}>
                 Clear filters
               </button>
             )}
-          </p>
+          </div>
           <select className="input w-auto py-1.5" value={sort} onChange={(e) => setSort(e.target.value as Sort)} aria-label="Sort">
             <option value="date-desc">Newest first</option>
             <option value="date-asc">Oldest first</option>
@@ -135,13 +153,13 @@ export function Transactions({ onEdit }: { onEdit: (t: Transaction) => void }) {
           </select>
         </div>
         {all === undefined ? (
-          <p className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">Loading…</p>
+          <p className="py-10 text-center text-sm text-muted">Loading…</p>
         ) : (
           <TransactionList
             transactions={filtered}
             categoryMap={catMap}
             onEdit={onEdit}
-            emptyMessage={hasFilters ? 'No transactions match these filters.' : 'No transactions yet. Tap “+ Add” to get started.'}
+            emptyMessage={hasFilters ? 'No transactions match these filters.' : 'No transactions yet. Use Add at the top to record your first one.'}
           />
         )}
       </section>

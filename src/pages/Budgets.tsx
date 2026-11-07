@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { BudgetBar, BudgetTotalBar } from '../components/BudgetBar';
+import { IconCopy } from '../components/Icons';
 import { MonthPicker } from '../components/MonthPicker';
+import { PageHeader } from '../components/PageHeader';
 import { copyBudgets, setBudget } from '../db/db';
 import { formatMoney, monthLabel, parseAmount, shiftMonth, toDecimal } from '../lib/format';
 import { useBudgets, useCategories, useTransactions } from '../lib/hooks';
@@ -29,51 +31,65 @@ export function Budgets({ month, setMonth }: { month: string; setMonth: (m: stri
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Budgets</h1>
+    <div className="space-y-6">
+      <PageHeader title="Budgets">
         <MonthPicker month={month} onChange={setMonth} />
-      </div>
+      </PageHeader>
 
       {budgets.length > 0 && (
-        <section className="card">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Total budgeted for {monthLabel(month)}</p>
-          <div className="mt-1 flex flex-wrap items-baseline gap-x-3">
-            <span className="text-2xl font-bold tabular-nums">{formatMoney(summary.spent)}</span>
-            <span className="text-slate-500 dark:text-slate-400">spent of {formatMoney(summary.limit)}</span>
+        <section className="card" aria-labelledby="budget-total-heading">
+          <h2 id="budget-total-heading" className="text-[13px] font-medium text-muted">
+            All budgets for {monthLabel(month)}
+          </h2>
+          <div className="mt-1 mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <p className="text-muted">
+              <span className="text-3xl font-bold tracking-tight text-ink tabular-nums">{formatMoney(summary.spent)}</span> spent of{' '}
+              {formatMoney(summary.limit)}
+            </p>
+            <p className={`text-sm tabular-nums ${summary.remaining < 0 ? 'font-semibold text-loss' : 'text-muted'}`}>
+              {summary.remaining < 0 ? `${formatMoney(-summary.remaining)} over` : `${formatMoney(summary.remaining)} left`}
+            </p>
           </div>
-          <div className="mt-3">
-            <BudgetTotalBar spent={summary.spent} limit={summary.limit} status={summary.status} label="Total budget used" />
-          </div>
+          <BudgetTotalBar spent={summary.spent} limit={summary.limit} status={summary.status} label="Total budget used" />
         </section>
       )}
 
-      <section className="card">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+      <section className="card" aria-labelledby="limits-heading">
+        <div className="mb-2 flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="font-semibold">Monthly limits by category</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Leave a limit empty for no budget. Bars turn amber at 80% and red when you go over.</p>
+            <h2 id="limits-heading" className="text-[17px] font-semibold tracking-tight">
+              Monthly limits by category
+            </h2>
+            <p className="mt-1 max-w-prose text-sm text-muted">
+              Leave a limit empty for no budget. A bar turns amber at 80% and red once you go over.
+            </p>
           </div>
           {prevBudgets.length > 0 && (
             <button className="btn-secondary" onClick={copyPrev}>
-              ⧉ Copy from {monthLabel(shiftMonth(month, -1))}
+              <IconCopy size={17} />
+              Copy from {monthLabel(shiftMonth(month, -1))}
             </button>
           )}
         </div>
-        {message && <p className="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">{message}</p>}
-        <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+        {message && (
+          <p role="status" className="mt-3 rounded-[10px] bg-brand-soft px-3 py-2 text-sm font-medium text-brand-text">
+            {message}
+          </p>
+        )}
+        <ul className="mt-2 divide-y divide-line">
           {expenseCats.map((c) => {
             const p = progress.find((x) => x.budget.categoryId === c.id);
             return (
-              <li key={c.id} className="grid items-center gap-3 py-3 sm:grid-cols-[1fr_10rem]">
+              <li key={c.id} className="grid items-center gap-x-8 gap-y-3 py-4 sm:grid-cols-[1fr_11rem]">
                 {p ? (
                   <BudgetBar p={p} />
                 ) : (
-                  <div className="text-sm">
-                    <span className="font-medium">
-                      {c.icon} {c.name}
+                  <div className="flex min-w-0 items-baseline justify-between gap-3 text-sm sm:justify-start">
+                    <span className="flex min-w-0 items-center gap-2 font-medium">
+                      <span aria-hidden>{c.icon}</span>
+                      <span className="truncate">{c.name}</span>
                     </span>
-                    <span className="ml-2 text-slate-500 dark:text-slate-400">{formatMoney(spentBy.get(c.id!) ?? 0)} spent · no budget</span>
+                    <span className="shrink-0 text-faint tabular-nums">{formatMoney(spentBy.get(c.id!) ?? 0)} spent, no limit</span>
                   </div>
                 )}
                 <LimitInput key={`${c.id}-${month}`} category={c} month={month} limit={p?.budget.limit} />
@@ -106,9 +122,10 @@ function LimitInput({ category, month, limit }: { category: Category; month: str
 
   return (
     <div className="relative">
-      <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-slate-400">GH₵</span>
+      <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-faint">GH₵</span>
       <input
-        className={`input pl-12 text-right tabular-nums ${error ? 'border-rose-500' : ''}`}
+        className={`input pl-12 text-right font-semibold tabular-nums placeholder:font-normal ${error ? 'border-loss' : ''}`}
+        aria-invalid={error}
         inputMode="decimal"
         placeholder="No limit"
         aria-label={`Monthly budget for ${category.name}`}

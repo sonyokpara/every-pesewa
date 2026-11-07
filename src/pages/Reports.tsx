@@ -1,8 +1,9 @@
 import { endOfMonth, format, parseISO, startOfYear, subMonths } from 'date-fns';
 import { useMemo, useState } from 'react';
 import { CategoryDonut, MonthlyBars } from '../components/Charts';
+import { PageHeader, PanelHeader } from '../components/PageHeader';
 import { SummaryCards } from '../components/SummaryCards';
-import { currentMonth, formatMoney, todayISO } from '../lib/format';
+import { currentMonth, formatDate, formatMoney, todayISO } from '../lib/format';
 import { useCategories, useTransactions } from '../lib/hooks';
 import { byCategory, inRange, monthlyTrend, totals } from '../lib/stats';
 
@@ -54,32 +55,45 @@ export function Reports() {
   const avgSpend = activeMonths.length ? activeMonths.reduce((s, p) => s + p.expense, 0) / activeMonths.length : 0;
   const savingsRate = sum.income > 0 ? sum.balance / sum.income : null;
 
-  const rangeLabel = preset === 'all' ? 'All time' : PRESETS.find((p) => p.id === preset)!.label;
+  // Spell out the dates the figures cover, so "This year" or a custom range is unambiguous.
+  const rangeDescription =
+    preset === 'all'
+      ? 'Showing everything you’ve recorded.'
+      : from && to
+        ? `Showing ${formatDate(from)} to ${formatDate(to)}.`
+        : from
+          ? `Showing from ${formatDate(from)}.`
+          : to
+            ? `Showing up to ${formatDate(to)}.`
+            : 'Showing everything you’ve recorded.';
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Reports</h1>
-        <div className="flex flex-wrap gap-1">
-          {PRESETS.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => {
-                if (p.id === 'custom' && preset !== 'custom') setCustom([from, to]);
-                setPreset(p.id);
-              }}
-              className={`btn px-2.5 py-1.5 text-xs ${
-                preset === p.id ? 'bg-emerald-700 text-white' : 'bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300'
-              }`}
-            >
-              {p.label}
-            </button>
-          ))}
+    <div className="space-y-6">
+      <PageHeader title="Reports">
+        {/* Scrolls sideways on narrow phones rather than wrapping into a ragged block. */}
+        <div className="-mx-4 w-[calc(100%+2rem)] overflow-x-auto px-4 sm:mx-0 sm:w-auto sm:px-0">
+          <div className="flex w-max gap-1 rounded-xl border border-line bg-surface p-1" role="group" aria-label="Period">
+            {PRESETS.map((p) => (
+              <button
+                key={p.id}
+                aria-pressed={preset === p.id}
+                onClick={() => {
+                  if (p.id === 'custom' && preset !== 'custom') setCustom([from, to]);
+                  setPreset(p.id);
+                }}
+                className={`cursor-pointer rounded-[9px] px-3 py-1.5 text-[13px] font-semibold whitespace-nowrap transition-colors ${
+                  preset === p.id ? 'bg-brand text-on-brand' : 'text-muted hover:bg-sunken hover:text-ink'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      </PageHeader>
 
       {preset === 'custom' && (
-        <div className="card flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 rounded-2xl border border-line bg-surface p-4">
           <div>
             <label className="label" htmlFor="r-from">
               From
@@ -95,46 +109,51 @@ export function Reports() {
         </div>
       )}
 
-      <SummaryCards totals={sum} label={rangeLabel} />
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="card">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Savings rate · {rangeLabel}</p>
-          <p className="mt-1 text-2xl font-bold tabular-nums">{savingsRate === null ? '—' : `${Math.round(savingsRate * 100)}%`}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Share of income left after expenses</p>
-        </div>
-        <div className="card">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Average monthly spending</p>
-          <p className="mt-1 text-2xl font-bold tabular-nums">{formatMoney(Math.round(avgSpend))}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Across active months in the 12-month trend below</p>
-        </div>
+      <div className="space-y-3">
+        <p className="text-sm text-muted">{rangeDescription}</p>
+        <SummaryCards totals={sum} />
+        <dl className="grid grid-cols-1 divide-y divide-line rounded-2xl border border-line bg-surface sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+          <div className="px-5 py-4">
+            <dt className="text-[13px] font-medium text-muted">Savings rate</dt>
+            <dd className="mt-1 text-2xl font-bold tracking-tight tabular-nums">
+              {savingsRate === null ? '—' : `${Math.round(savingsRate * 100)}%`}
+            </dd>
+            <dd className="mt-0.5 text-xs text-muted">Share of money in that you kept</dd>
+          </div>
+          <div className="px-5 py-4">
+            <dt className="text-[13px] font-medium text-muted">Average monthly spending</dt>
+            <dd className="mt-1 text-2xl font-bold tracking-tight tabular-nums">{formatMoney(Math.round(avgSpend))}</dd>
+            <dd className="mt-0.5 text-xs text-muted">Over months with activity in the 12-month trend</dd>
+          </div>
+        </dl>
       </div>
 
-      <section className="card">
-        <h2 className="mb-3 font-semibold">Spending by category</h2>
+      <section className="card" aria-labelledby="r-spending">
+        <PanelHeader id="r-spending" title="Spending by category" />
         <CategoryDonut data={spending} height={260} />
       </section>
 
-      <section className="card">
-        <h2 className="mb-3 font-semibold">Income vs expenses · last 12 months</h2>
+      <section className="card" aria-labelledby="r-trend">
+        <PanelHeader id="r-trend" title="Money in and out, last 12 months" />
         <MonthlyBars data={trend} />
       </section>
 
       {income.length > 0 && (
-        <section className="card">
-          <h2 className="mb-3 font-semibold">Income sources</h2>
-          <ul className="space-y-2">
+        <section className="card" aria-labelledby="r-income">
+          <PanelHeader id="r-income" title="Where your money came from" />
+          <ul className="space-y-4">
             {income.map((c) => (
               <li key={c.categoryId}>
-                <div className="mb-1 flex justify-between text-sm">
-                  <span>
-                    {c.icon} {c.name}
+                <div className="mb-1.5 flex justify-between gap-3 text-sm">
+                  <span className="flex min-w-0 items-center gap-2 font-medium">
+                    <span aria-hidden>{c.icon}</span>
+                    <span className="truncate">{c.name}</span>
                   </span>
-                  <span className="tabular-nums">
-                    {formatMoney(c.total)} <span className="text-slate-500 dark:text-slate-400">· {Math.round(c.share * 100)}%</span>
+                  <span className="shrink-0 font-semibold tabular-nums">
+                    {formatMoney(c.total)} <span className="ml-1 font-normal text-faint">{Math.round(c.share * 100)}%</span>
                   </span>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div className="h-2 overflow-hidden rounded-full bg-sunken">
                   <div className="h-full rounded-full" style={{ width: `${c.share * 100}%`, background: c.color }} />
                 </div>
               </li>

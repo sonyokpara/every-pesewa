@@ -3,6 +3,7 @@ import { db } from '../db/db';
 import { parseAmount, toDecimal, todayISO } from '../lib/format';
 import { useCategories } from '../lib/hooks';
 import type { Transaction, TxType } from '../types';
+import { IconTrash } from './Icons';
 import { Modal } from './Modal';
 
 interface Props {
@@ -20,6 +21,7 @@ export function TransactionForm({ open, editing, onClose }: Props) {
   const [date, setDate] = useState(todayISO());
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -29,7 +31,13 @@ export function TransactionForm({ open, editing, onClose }: Props) {
     setDate(editing?.date ?? todayISO());
     setNote(editing?.note ?? '');
     setError('');
+    setConfirmDelete(false);
   }, [open, editing]);
+
+  async function remove() {
+    if (editing?.id) await db.transactions.delete(editing.id);
+    onClose();
+  }
 
   const options = useMemo(
     () => categories.filter((c) => c.type === type).sort((a, b) => a.name.localeCompare(b.name)),
@@ -56,52 +64,59 @@ export function TransactionForm({ open, editing, onClose }: Props) {
 
   return (
     <Modal title={editing ? 'Edit transaction' : 'Add transaction'} open={open} onClose={onClose}>
-      <form onSubmit={submit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-1 dark:bg-slate-800">
+      <form onSubmit={submit} className="space-y-5" noValidate>
+        <div className="grid grid-cols-2 gap-1 rounded-xl bg-sunken p-1" role="group" aria-label="Type">
           {(['expense', 'income'] as const).map((t) => (
             <button
               key={t}
               type="button"
+              aria-pressed={type === t}
               onClick={() => setType(t)}
-              className={`rounded-md py-1.5 text-sm font-medium capitalize transition ${
+              className={`cursor-pointer rounded-[9px] py-2 text-sm font-semibold transition-colors ${
                 type === t
-                  ? t === 'expense'
-                    ? 'bg-white text-rose-600 shadow dark:bg-slate-900 dark:text-rose-400'
-                    : 'bg-white text-emerald-700 shadow dark:bg-slate-900 dark:text-emerald-400'
-                  : 'text-slate-500 dark:text-slate-400'
+                  ? `bg-surface shadow-[0_1px_2px_rgb(6_18_13/0.12)] ${t === 'income' ? 'text-gain' : 'text-ink'}`
+                  : 'text-muted hover:text-ink'
               }`}
             >
-              {t}
+              {t === 'expense' ? 'Money out' : 'Money in'}
             </button>
           ))}
         </div>
 
+        {/* The amount is the one thing every entry needs, so it gets the most room. */}
         <div>
           <label className="label" htmlFor="tx-amount">
-            Amount (GH₵)
+            Amount
           </label>
-          <input
-            id="tx-amount"
-            className="input text-lg font-semibold"
-            inputMode="decimal"
-            placeholder="0.00"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            data-autofocus
-          />
+          <div
+            className={`flex items-baseline gap-2 rounded-xl border bg-surface px-4 py-3 focus-within:ring-2 focus-within:ring-brand/25 ${
+              error && !parseAmount(amount) ? 'border-loss' : 'border-line focus-within:border-brand'
+            }`}
+          >
+            <span className="text-lg font-semibold text-faint" aria-hidden>
+              GH₵
+            </span>
+            <input
+              id="tx-amount"
+              className="w-full min-w-0 bg-transparent text-[32px] leading-none font-bold tracking-tight outline-none placeholder:text-faint/60 focus-visible:outline-none"
+              inputMode="decimal"
+              autoComplete="off"
+              placeholder="0.00"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              aria-invalid={!!error && !parseAmount(amount)}
+              aria-describedby={error ? 'tx-error' : undefined}
+              data-autofocus
+            />
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2">
           <div>
             <label className="label" htmlFor="tx-category">
               Category
             </label>
-            <select
-              id="tx-category"
-              className="input"
-              value={categoryId}
-              onChange={(e) => setCategoryId(Number(e.target.value))}
-            >
+            <select id="tx-category" className="input" value={categoryId} onChange={(e) => setCategoryId(Number(e.target.value))}>
               {options.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.icon} {c.name}
@@ -119,27 +134,46 @@ export function TransactionForm({ open, editing, onClose }: Props) {
 
         <div>
           <label className="label" htmlFor="tx-note">
-            Note
+            Note <span className="font-normal text-faint">(optional)</span>
           </label>
-          <input
-            id="tx-note"
-            className="input"
-            placeholder="e.g. Trotro to Madina"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-          />
+          <input id="tx-note" className="input" placeholder="e.g. Trotro to Madina" value={note} onChange={(e) => setNote(e.target.value)} />
         </div>
 
-        {error && <p className="text-sm text-rose-600">{error}</p>}
+        {error && (
+          <p id="tx-error" role="alert" className="text-sm font-medium text-loss">
+            {error}
+          </p>
+        )}
 
-        <div className="flex justify-end gap-2 pt-1">
-          <button type="button" className="btn-secondary" onClick={onClose}>
-            Cancel
-          </button>
-          <button type="submit" className="btn-primary">
-            {editing ? 'Save changes' : 'Add'}
-          </button>
-        </div>
+        {confirmDelete ? (
+          // Two-step delete inside the form, rather than a second dialog stacked on this one.
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-loss-soft px-4 py-3" role="alert">
+            <p className="text-sm font-medium text-loss">Delete this transaction for good?</p>
+            <div className="flex gap-2">
+              <button type="button" className="btn-secondary" onClick={() => setConfirmDelete(false)}>
+                Keep it
+              </button>
+              <button type="button" className="btn-danger" onClick={remove}>
+                Delete
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-end gap-2 pt-1">
+            {editing?.id && (
+              <button type="button" className="btn mr-auto px-2 text-loss hover:bg-loss-soft" onClick={() => setConfirmDelete(true)}>
+                <IconTrash size={17} />
+                Delete
+              </button>
+            )}
+            <button type="button" className="btn-secondary" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary min-w-28">
+              {editing ? 'Save changes' : 'Add transaction'}
+            </button>
+          </div>
+        )}
       </form>
     </Modal>
   );

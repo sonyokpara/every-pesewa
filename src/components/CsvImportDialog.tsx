@@ -2,6 +2,7 @@ import { useMemo, useState, type ChangeEvent } from 'react';
 import { applyImport } from '../db/db';
 import { buildImport, guessMapping, parseCsvText, type ColumnMapping, type ParsedCsv } from '../lib/csv';
 import { formatDate, formatMoney } from '../lib/format';
+import { IconFile } from './Icons';
 import { Modal } from './Modal';
 
 const FIELDS: { key: keyof ColumnMapping; label: string; required: boolean; hint?: string }[] = [
@@ -68,9 +69,9 @@ export function CsvImportDialog({ open, onClose }: { open: boolean; onClose: () 
   return (
     <Modal title="Import transactions from CSV" open={open} onClose={close} wide>
       {done ? (
-        <div className="space-y-4">
-          <div className="rounded-lg bg-emerald-50 p-4 text-sm text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
-            ✅ Imported <strong>{done.imported}</strong> transaction{done.imported === 1 ? '' : 's'}
+        <div className="space-y-5">
+          <div role="status" className="rounded-xl bg-brand-soft p-4 text-sm text-brand-text">
+            Imported <strong>{done.imported}</strong> transaction{done.imported === 1 ? '' : 's'}
             {done.categoriesCreated > 0 && <>, created {done.categoriesCreated} new categor{done.categoriesCreated === 1 ? 'y' : 'ies'}</>}
             {done.skipped > 0 && <>, skipped {done.skipped} invalid row{done.skipped === 1 ? '' : 's'}</>}.
           </div>
@@ -84,28 +85,30 @@ export function CsvImportDialog({ open, onClose }: { open: boolean; onClose: () 
           </div>
         </div>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-6">
           <div>
-            <label className="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-slate-300 p-6 text-center text-sm hover:border-emerald-500 hover:bg-emerald-50/50 dark:border-slate-700 dark:hover:bg-emerald-950/30">
-              <span className="text-2xl" aria-hidden>
-                📄
-              </span>
-              <span className="font-medium">{fileName || 'Choose a CSV file'}</span>
-              <span className="text-xs text-slate-500 dark:text-slate-400">Exported from this app, a spreadsheet, or your bank / MoMo statement</span>
+            <label className="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-line px-6 py-8 text-center text-sm transition-colors focus-within:border-brand focus-within:bg-brand-soft/40 hover:border-brand hover:bg-brand-soft/40">
+              <IconFile size={28} className="mb-1 text-brand-text" />
+              <span className="font-semibold">{fileName || 'Choose a CSV file'}</span>
+              <span className="text-xs text-muted">Exported from this app, a spreadsheet, or your bank or MoMo statement</span>
               <input type="file" accept=".csv,text/csv" className="sr-only" onChange={onFile} />
             </label>
-            {loadError && <p className="mt-2 text-sm text-rose-600">{loadError}</p>}
+            {loadError && (
+              <p role="alert" className="mt-2 text-sm font-medium text-loss">
+                {loadError}
+              </p>
+            )}
           </div>
 
           {csv && mapping && (
             <>
               <div>
-                <h3 className="mb-2 text-sm font-semibold">Match your columns</h3>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <h3 className="mb-3 text-sm font-semibold">Match your columns</h3>
+                <div className="grid gap-4 sm:grid-cols-2">
                   {FIELDS.map((f) => (
                     <div key={f.key}>
                       <label className="label" htmlFor={`map-${f.key}`}>
-                        {f.label} {f.required && <span className="text-rose-500">*</span>}
+                        {f.label} {f.required ? <span className="text-loss">*</span> : <span className="font-normal text-faint">(optional)</span>}
                       </label>
                       <select
                         id={`map-${f.key}`}
@@ -120,7 +123,7 @@ export function CsvImportDialog({ open, onClose }: { open: boolean; onClose: () 
                           </option>
                         ))}
                       </select>
-                      {f.hint && <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{f.hint}</p>}
+                      {f.hint && <p className="mt-1.5 text-xs text-muted">{f.hint}</p>}
                     </div>
                   ))}
                 </div>
@@ -128,46 +131,44 @@ export function CsvImportDialog({ open, onClose }: { open: boolean; onClose: () 
 
               {result && (
                 <div>
-                  <h3 className="mb-2 text-sm font-semibold">
-                    Preview{' '}
-                    <span className="font-normal text-slate-500 dark:text-slate-400">
-                      · {result.valid.length} ready, {result.errors.length} with problems
+                  <h3 className="mb-3 flex flex-wrap items-baseline gap-x-3 text-sm font-semibold">
+                    Preview
+                    <span className="font-normal text-muted">
+                      {result.valid.length} ready, {result.errors.length} with problems
                     </span>
                   </h3>
                   {result.valid.length > 0 && (
-                    <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
+                    <div className="overflow-x-auto rounded-xl border border-line">
                       <table className="w-full text-left text-sm">
-                        <thead className="bg-slate-50 text-xs text-slate-500 dark:text-slate-400 dark:bg-slate-800/60">
+                        <thead className="bg-sunken text-xs text-muted">
                           <tr>
-                            <th className="px-3 py-2">Date</th>
-                            <th className="px-3 py-2">Type</th>
-                            <th className="px-3 py-2">Category</th>
-                            <th className="px-3 py-2 text-right">Amount</th>
-                            <th className="px-3 py-2">Note</th>
+                            <th className="px-3 py-2 font-medium">Date</th>
+                            <th className="px-3 py-2 font-medium">Type</th>
+                            <th className="px-3 py-2 font-medium">Category</th>
+                            <th className="px-3 py-2 text-right font-medium">Amount</th>
+                            <th className="px-3 py-2 font-medium">Note</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        <tbody className="divide-y divide-line">
                           {result.valid.slice(0, 5).map((r, i) => (
                             <tr key={i}>
-                              <td className="whitespace-nowrap px-3 py-1.5">{formatDate(r.date)}</td>
-                              <td className={`px-3 py-1.5 capitalize ${r.type === 'income' ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>{r.type}</td>
-                              <td className="px-3 py-1.5">{r.categoryName}</td>
-                              <td className="whitespace-nowrap px-3 py-1.5 text-right tabular-nums">{formatMoney(r.amount)}</td>
-                              <td className="max-w-48 truncate px-3 py-1.5 text-slate-500 dark:text-slate-400">{r.note}</td>
+                              <td className="px-3 py-2 whitespace-nowrap">{formatDate(r.date)}</td>
+                              <td className={`px-3 py-2 capitalize ${r.type === 'income' ? 'text-gain' : 'text-muted'}`}>{r.type}</td>
+                              <td className="px-3 py-2">{r.categoryName}</td>
+                              <td className="px-3 py-2 text-right font-semibold whitespace-nowrap tabular-nums">{formatMoney(r.amount)}</td>
+                              <td className="max-w-48 truncate px-3 py-2 text-muted">{r.note}</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                       {result.valid.length > 5 && (
-                        <p className="border-t border-slate-100 px-3 py-1.5 text-xs text-slate-500 dark:text-slate-400 dark:border-slate-800">
-                          …and {result.valid.length - 5} more
-                        </p>
+                        <p className="border-t border-line px-3 py-2 text-xs text-muted">…and {result.valid.length - 5} more</p>
                       )}
                     </div>
                   )}
                   {result.errors.length > 0 && (
-                    <details className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
-                      <summary className="cursor-pointer font-medium">
+                    <details className="mt-3 rounded-xl bg-warn-soft p-3 text-sm text-warn">
+                      <summary className="cursor-pointer font-semibold">
                         {result.errors.length} row{result.errors.length === 1 ? '' : 's'} will be skipped
                       </summary>
                       <ul className="mt-2 max-h-40 space-y-0.5 overflow-y-auto text-xs">

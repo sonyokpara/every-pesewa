@@ -1,7 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState, type ChangeEvent } from 'react';
 import { CsvImportDialog } from '../components/CsvImportDialog';
+import { IconClose, IconDownload, IconPencil, IconPlus, IconRestore, IconTrash, IconUpload } from '../components/Icons';
 import { ConfirmDialog, Modal } from '../components/Modal';
+import { PageHeader, PanelHeader } from '../components/PageHeader';
 import { PALETTE, clearAllData, db, deleteCategory, exportBackup, restoreBackup, type Backup } from '../db/db';
 import { describeBackupErrors, validateBackup } from '../lib/backup';
 import { exportTransactionsCsv } from '../lib/csv';
@@ -58,86 +60,120 @@ export function Settings() {
   ];
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-2xl font-bold">Settings</h1>
+    <div className="space-y-6">
+      <PageHeader title="Settings" />
 
       {notice && (
         <div
-          className={`flex items-center justify-between rounded-lg px-4 py-3 text-sm ${
-            notice.kind === 'ok' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200' : 'bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200'
+          role={notice.kind === 'error' ? 'alert' : 'status'}
+          className={`flex items-start justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium ${
+            notice.kind === 'ok' ? 'bg-brand-soft text-brand-text' : 'bg-loss-soft text-loss'
           }`}
         >
-          {notice.text}
-          <button onClick={() => setNotice(null)} aria-label="Dismiss" className="ml-3 cursor-pointer">
-            ✕
+          <span className="pt-1.5">{notice.text}</span>
+          <button onClick={() => setNotice(null)} aria-label="Dismiss" className="btn -mr-2 h-8 w-8 shrink-0 px-0 hover:bg-black/5">
+            <IconClose size={16} />
           </button>
         </div>
       )}
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         {groups.map((g) => (
-          <section key={g.type} className="card">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-semibold">{g.title}</h2>
+          <section key={g.type} className="card" aria-labelledby={`cats-${g.type}`}>
+            <PanelHeader id={`cats-${g.type}`} title={g.title}>
               <button
-                className="btn-secondary py-1.5"
+                className="btn-secondary py-1.5 pl-2.5"
                 onClick={() =>
                   setEditing({ name: '', type: g.type, color: PALETTE[categories.length % PALETTE.length], icon: g.type === 'income' ? '💰' : '🏷️' })
                 }
               >
-                + New
+                <IconPlus size={16} />
+                New category
               </button>
-            </div>
-            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+            </PanelHeader>
+            <ul className="-mx-2 divide-y divide-line">
               {categories
                 .filter((c) => c.type === g.type)
                 .sort((a, b) => a.name.localeCompare(b.name))
-                .map((c) => (
-                  <li key={c.id} className="flex items-center gap-3 py-2">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full" style={{ background: `${c.color}22` }}>
-                      {c.icon}
-                    </span>
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: c.color }} />
-                    <span className="flex-1 text-sm font-medium">{c.name}</span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">{usage?.get(c.id!) ?? 0} txns</span>
-                    <button className="btn px-2 py-1 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => setEditing(c)} aria-label={`Edit ${c.name}`}>
-                      ✎
-                    </button>
-                    <button
-                      className="btn px-2 py-1 text-slate-500 dark:text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:text-rose-400 dark:hover:bg-rose-950"
-                      onClick={() => setDeleting(c)}
-                      aria-label={`Delete ${c.name}`}
-                    >
-                      🗑
-                    </button>
-                  </li>
-                ))}
+                .map((c) => {
+                  const n = usage?.get(c.id!) ?? 0;
+                  return (
+                    <li key={c.id} className="flex items-center gap-3 px-2 py-2.5">
+                      {/* The tile's tint is the category colour, so a separate swatch isn't needed. */}
+                      <span
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border-2"
+                        style={{ background: `${c.color}26`, borderColor: `${c.color}80` }}
+                        aria-hidden
+                      >
+                        {c.icon}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-sm font-semibold">{c.name}</span>
+                      <span className="text-xs text-faint tabular-nums">
+                        {n} transaction{n === 1 ? '' : 's'}
+                      </span>
+                      <span className="flex gap-0.5">
+                        <button className="btn-ghost h-9 w-9 px-0" onClick={() => setEditing(c)} aria-label={`Edit ${c.name}`} title="Edit">
+                          <IconPencil size={17} />
+                        </button>
+                        <button
+                          className="btn-ghost h-9 w-9 px-0 hover:bg-loss-soft hover:text-loss"
+                          onClick={() => setDeleting(c)}
+                          aria-label={`Delete ${c.name}`}
+                          title="Delete"
+                        >
+                          <IconTrash size={17} />
+                        </button>
+                      </span>
+                    </li>
+                  );
+                })}
             </ul>
           </section>
         ))}
       </div>
 
-      <section className="card space-y-4">
-        <h2 className="font-semibold">Your data</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Everything is stored privately in this browser ({txCount} transaction{txCount === 1 ? '' : 's'}). Nothing is sent to a server. Make a backup now and then
-          — clearing your browser data will erase it.
+      <section className="card" aria-labelledby="data-heading">
+        <PanelHeader id="data-heading" title="Your data" />
+        <p className="max-w-prose text-sm leading-relaxed text-muted">
+          Your {txCount} transaction{txCount === 1 ? ' is' : 's are'} stored only in this browser and never sent to a server. Clearing your browser
+          data erases them, so download a backup now and then.
         </p>
-        <div className="flex flex-wrap gap-2">
-          <button className="btn-primary" onClick={() => setImportOpen(true)}>
-            ⬆ Import CSV
-          </button>
-          <button className="btn-secondary" onClick={exportCsv} disabled={!txCount}>
-            ⬇ Export CSV
-          </button>
-          <button className="btn-secondary" onClick={backup}>
-            💾 Download backup (JSON)
-          </button>
-          <label className="btn-secondary">
-            ♻ Restore backup
-            <input type="file" accept=".json,application/json" className="sr-only" onChange={onRestoreFile} />
-          </label>
-          <button className="btn border border-rose-300 text-rose-600 hover:bg-rose-50 dark:border-rose-900 dark:hover:bg-rose-950" onClick={() => setConfirmClear(true)}>
+
+        <div className="mt-5 grid gap-6 sm:grid-cols-2">
+          <div>
+            <h3 className="mb-2 text-sm font-semibold">Spreadsheets</h3>
+            <div className="flex flex-wrap gap-2">
+              <button className="btn-primary" onClick={() => setImportOpen(true)}>
+                <IconUpload size={17} />
+                Import CSV
+              </button>
+              <button className="btn-secondary" onClick={exportCsv} disabled={!txCount}>
+                <IconDownload size={17} />
+                Export CSV
+              </button>
+            </div>
+          </div>
+          <div>
+            <h3 className="mb-2 text-sm font-semibold">Full backup</h3>
+            <div className="flex flex-wrap gap-2">
+              <button className="btn-secondary" onClick={backup}>
+                <IconDownload size={17} />
+                Download backup
+              </button>
+              <label className="btn-secondary focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand">
+                <IconRestore size={17} />
+                Restore backup
+                <input type="file" accept=".json,application/json" className="sr-only" onChange={onRestoreFile} />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-loss/30 bg-loss-soft/50 px-4 py-3">
+          <p className="text-sm text-muted">
+            <span className="font-semibold text-ink">Clear all data.</span> Deletes every transaction, budget and category in this browser.
+          </p>
+          <button className="btn border border-loss/40 bg-surface text-loss hover:bg-loss-soft" onClick={() => setConfirmClear(true)}>
             Clear all data
           </button>
         </div>
@@ -255,8 +291,9 @@ function CategoryEditor({ category, onClose, existing }: { category: Category | 
               <button
                 type="button"
                 key={i}
+                aria-pressed={draft.icon === i}
                 onClick={() => setDraft({ ...draft, icon: i })}
-                className={`h-9 w-9 cursor-pointer rounded-lg text-lg ${draft.icon === i ? 'bg-emerald-100 ring-2 ring-emerald-500 dark:bg-emerald-900' : 'hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                className={`h-10 w-10 cursor-pointer rounded-[10px] text-lg ${draft.icon === i ? 'bg-brand-soft ring-2 ring-brand' : 'hover:bg-sunken'}`}
               >
                 {i}
               </button>
@@ -271,15 +308,26 @@ function CategoryEditor({ category, onClose, existing }: { category: Category | 
                 type="button"
                 key={c}
                 aria-label={`Colour ${c}`}
+                aria-pressed={draft.color === c}
                 onClick={() => setDraft({ ...draft, color: c })}
-                className={`h-7 w-7 cursor-pointer rounded-full ${draft.color === c ? 'ring-2 ring-slate-900 ring-offset-2 dark:ring-white dark:ring-offset-slate-900' : ''}`}
+                className={`h-8 w-8 cursor-pointer rounded-full ${draft.color === c ? 'ring-2 ring-ink ring-offset-2 ring-offset-surface' : ''}`}
                 style={{ background: c }}
               />
             ))}
-            <input type="color" value={draft.color} onChange={(e) => setDraft({ ...draft, color: e.target.value })} className="h-7 w-9 cursor-pointer" aria-label="Custom colour" />
+            <input
+              type="color"
+              value={draft.color}
+              onChange={(e) => setDraft({ ...draft, color: e.target.value })}
+              className="h-8 w-10 cursor-pointer rounded-md border border-line bg-surface"
+              aria-label="Custom colour"
+            />
           </div>
         </div>
-        {error && <p className="text-sm text-rose-600">{error}</p>}
+        {error && (
+          <p role="alert" className="text-sm font-medium text-loss">
+            {error}
+          </p>
+        )}
         <div className="flex justify-end gap-2">
           <button type="button" className="btn-secondary" onClick={onClose}>
             Cancel
