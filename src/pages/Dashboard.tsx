@@ -88,8 +88,8 @@ function DashboardContent({
           <>
             <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               <p className="text-sm text-muted">
-                <span className="text-2xl font-bold tracking-tight text-ink tabular-nums">{formatMoney(budget.spent)}</span> spent of{' '}
-                {formatMoney(budget.limit)}
+                <span className="text-2xl font-bold tracking-tight text-ink tabular-nums">{formatMoney(budget.spent)}</span>{' '}
+                <span className="whitespace-nowrap">spent of {formatMoney(budget.limit)}</span>
               </p>
               <p className={`text-sm tabular-nums ${budget.remaining < 0 ? 'font-semibold text-loss' : 'text-muted'}`}>
                 {budget.remaining < 0 ? `${formatMoney(-budget.remaining)} over` : `${formatMoney(budget.remaining)} left`}

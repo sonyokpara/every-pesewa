@@ -70,9 +70,9 @@ export function Reports() {
   return (
     <div className="space-y-6">
       <PageHeader title="Reports">
-        {/* Scrolls sideways on narrow phones rather than wrapping into a ragged block. */}
-        <div className="-mx-4 w-[calc(100%+2rem)] overflow-x-auto px-4 sm:mx-0 sm:w-auto sm:px-0">
-          <div className="flex w-max gap-1 rounded-xl border border-line bg-surface p-1" role="group" aria-label="Period">
+        {/* A 3 x 2 grid on phones so every period is visible; one row from sm up. */}
+        <div className="w-full sm:w-auto">
+          <div className="grid grid-cols-3 gap-1 rounded-xl border border-line bg-surface p-1 sm:flex" role="group" aria-label="Period">
             {PRESETS.map((p) => (
               <button
                 key={p.id}
@@ -81,7 +81,7 @@ export function Reports() {
                   if (p.id === 'custom' && preset !== 'custom') setCustom([from, to]);
                   setPreset(p.id);
                 }}
-                className={`cursor-pointer rounded-[9px] px-3 py-1.5 text-[13px] font-semibold whitespace-nowrap transition-colors ${
+                className={`cursor-pointer rounded-[9px] px-2 py-2 text-[13px] sm:px-3 sm:py-1.5 font-semibold whitespace-nowrap transition-colors ${
                   preset === p.id ? 'bg-brand text-on-brand' : 'text-muted hover:bg-sunken hover:text-ink'
                 }`}
               >
@@ -93,7 +93,7 @@ export function Reports() {
       </PageHeader>
 
       {preset === 'custom' && (
-        <div className="flex flex-wrap gap-3 rounded-2xl border border-line bg-surface p-4">
+        <div className="grid grid-cols-2 gap-3 rounded-2xl border border-line bg-surface p-4 sm:flex">
           <div>
             <label className="label" htmlFor="r-from">
               From

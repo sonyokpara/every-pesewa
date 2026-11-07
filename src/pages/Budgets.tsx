@@ -43,8 +43,8 @@ export function Budgets({ month, setMonth }: { month: string; setMonth: (m: stri
           </h2>
           <div className="mt-1 mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
             <p className="text-muted">
-              <span className="text-3xl font-bold tracking-tight text-ink tabular-nums">{formatMoney(summary.spent)}</span> spent of{' '}
-              {formatMoney(summary.limit)}
+              <span className="text-3xl font-bold tracking-tight text-ink tabular-nums">{formatMoney(summary.spent)}</span>{' '}
+              <span className="whitespace-nowrap">spent of {formatMoney(summary.limit)}</span>
             </p>
             <p className={`text-sm tabular-nums ${summary.remaining < 0 ? 'font-semibold text-loss' : 'text-muted'}`}>
               {summary.remaining < 0 ? `${formatMoney(-summary.remaining)} over` : `${formatMoney(summary.remaining)} left`}
@@ -80,16 +80,22 @@ export function Budgets({ month, setMonth }: { month: string; setMonth: (m: stri
           {expenseCats.map((c) => {
             const p = progress.find((x) => x.budget.categoryId === c.id);
             return (
-              <li key={c.id} className="grid items-center gap-x-8 gap-y-3 py-4 sm:grid-cols-[1fr_11rem]">
+              // Without a limit there's no bar, so on phones the name and input share one line.
+              <li
+                key={c.id}
+                className={`grid items-center gap-x-4 gap-y-3 sm:grid-cols-[1fr_11rem] sm:gap-x-8 ${p ? 'py-4' : 'grid-cols-[1fr_8.5rem] py-3 sm:py-4'}`}
+              >
                 {p ? (
                   <BudgetBar p={p} />
                 ) : (
-                  <div className="flex min-w-0 items-baseline justify-between gap-3 text-sm sm:justify-start">
+                  <div className="min-w-0 text-sm sm:flex sm:items-baseline sm:gap-3">
                     <span className="flex min-w-0 items-center gap-2 font-medium">
                       <span aria-hidden>{c.icon}</span>
                       <span className="truncate">{c.name}</span>
                     </span>
-                    <span className="shrink-0 text-faint tabular-nums">{formatMoney(spentBy.get(c.id!) ?? 0)} spent, no limit</span>
+                    <span className="mt-0.5 block text-xs text-faint tabular-nums sm:mt-0 sm:text-sm">
+                      {formatMoney(spentBy.get(c.id!) ?? 0)} spent, no limit
+                    </span>
                   </div>
                 )}
                 <LimitInput key={`${c.id}-${month}`} category={c} month={month} limit={p?.budget.limit} />

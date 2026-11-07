@@ -144,7 +144,7 @@ export function Transactions({ onEdit }: { onEdit: (t: Transaction) => void }) {
               </span>
             </p>
             {hasFilters && (
-              <button className="link" onClick={clear}>
+              <button className="link -my-1.5 py-1.5" onClick={clear}>
                 Clear filters
               </button>
             )}

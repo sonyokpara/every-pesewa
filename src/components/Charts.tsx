@@ -91,7 +91,7 @@ export function MonthlyBars({ data, height = 300 }: { data: MonthPoint[]; height
         <BarChart data={data} margin={{ top: 8, right: 4, left: 0, bottom: 0 }} barGap={3} barCategoryGap="22%">
           <CartesianGrid vertical={false} stroke="var(--line)" />
           <XAxis dataKey="label" tick={tick} axisLine={false} tickLine={false} />
-          <YAxis tickFormatter={(v) => formatMoneyCompact(Number(v))} tick={tick} axisLine={false} tickLine={false} width={72} />
+          <YAxis tickFormatter={(v) => formatMoneyCompact(Number(v))} tick={tick} axisLine={false} tickLine={false} width={60} />
           <Tooltip formatter={(v) => formatMoney(Number(v))} cursor={{ fill: 'var(--sunken)' }} {...tooltipStyle} />
           <Legend
             align="left"

@@ -107,9 +107,11 @@ export function Settings() {
                       >
                         {c.icon}
                       </span>
-                      <span className="min-w-0 flex-1 truncate text-sm font-semibold">{c.name}</span>
-                      <span className="text-xs text-faint tabular-nums">
-                        {n} transaction{n === 1 ? '' : 's'}
+                      <span className="flex min-w-0 flex-1 flex-col sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+                        <span className="truncate text-sm font-semibold">{c.name}</span>
+                        <span className="text-xs text-faint tabular-nums">
+                          {n} transaction{n === 1 ? '' : 's'}
+                        </span>
                       </span>
                       <span className="flex gap-0.5">
                         <button className="btn-ghost h-9 w-9 px-0" onClick={() => setEditing(c)} aria-label={`Edit ${c.name}`} title="Edit">
