@@ -18,6 +18,10 @@ There is no linter. `npm run build` is the type/unused-code check (`strict`, `no
 
 After every change, commit it and push to GitHub (`origin`, branch `main`). Write a descriptive commit message: a short summary line saying what changed, then a body explaining why when that isn't obvious. Keep unrelated changes in separate commits.
 
+## Deployment
+
+The app is hosted on Render as a static site, configured by `render.yaml` (build `npm ci && npm run build`, publish `dist/`, Node 22). Render auto-deploys every push to `main`. The `deploy-render` skill (`.claude/skills/deploy-render`) covers first-time setup, redeploys and checking the live site.
+
 ## What this is
 
 "Every Pesewa" (formerly "Cedi Tracker", package `every-pesewa`) is a client-only React 18 + TypeScript + Vite expense tracker. It has no backend. All data lives in the browser's IndexedDB through Dexie. Currency is Ghanaian Cedi (GHS).

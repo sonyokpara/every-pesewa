@@ -1,0 +1,24 @@
+# Render Blueprint: deploys Every Pesewa as a static site (no server; data stays in the browser).
+# Routing is hash-based (#dashboard etc.), so no rewrite rules are needed.
+services:
+  - type: web
+    runtime: static
+    name: every-pesewa
+    branch: main
+    autoDeploy: true
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+    headers:
+      # Vite fingerprints everything in /assets, so those files can be cached forever.
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: no-referrer
