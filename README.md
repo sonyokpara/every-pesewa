@@ -3,6 +3,8 @@
 A personal finance / expense tracker that runs entirely in your browser. Amounts are in Ghanaian Cedi (GH₵).
 Your data is stored locally in IndexedDB and never leaves your device.
 
+**Live:** https://every-pesewa-c6sj.onrender.com (hosted on Render; every push to `main` redeploys it)
+
 ## Run it
 
 ```bash
